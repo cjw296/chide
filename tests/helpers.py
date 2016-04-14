@@ -7,4 +7,8 @@ class Comparable:
         )
 
     def __eq__(self, other):
-        return type(self) is type(other) and vars(self)==vars(other)
+        self_vars = dict((k, v) for (k, v) in vars(self).items()
+                         if not k.startswith('_'))
+        other_vars = dict((k, v) for (k, v) in vars(other).items()
+                         if not k.startswith('_'))
+        return type(self) is type(other) and self_vars == other_vars

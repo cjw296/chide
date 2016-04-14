@@ -19,11 +19,10 @@ class Collection(dict):
         computed_attrs.update(attrs)
         if self.identify is not None:
             key = self.identify(type_, computed_attrs)
-            obj = self.instances.get(key)
-            if obj is None:
-                obj = type_(**computed_attrs)
-                self.instances[key] = obj
-            return obj
-
-        else:
-            return type_(**computed_attrs)
+            if key:
+                obj = self.instances.get(key)
+                if obj is None:
+                    obj = type_(**computed_attrs)
+                    self.instances[key] = obj
+                return obj
+        return type_(**computed_attrs)
