@@ -25,5 +25,6 @@ deploy:
   on:
     tags: true
     repo: cjw296/chide
+    python: "3.5"
   skip_cleanup: true
   distributions: "sdist bdist_wheel"
