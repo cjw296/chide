@@ -2,6 +2,23 @@ from weakref import WeakValueDictionary
 
 
 class Collection(dict):
+    """
+    A collection of attributes to use to make sample objects.
+
+    :param mapping:
+        A dictionary mapping object types to a dictionary
+        of attributes to make a sample object of that type.
+
+    :param identify:
+        An optional callable that will determine the identity
+        of a sample object. The callable must take the :class:`type`
+        of the sample object that the dictionary of attributes
+        that will be used to create it and should return a hashable
+        object representing the identity of that object.
+        Only one object with a given identity will be instantiated, after
+        that any calls to :meth:`~Collection.make` will return that
+        instance rather than creating a new one.
+    """
 
     identify = None
 
@@ -12,6 +29,14 @@ class Collection(dict):
             self.identify = identify
 
     def make(self, type_, **attrs):
+        """
+        Make a sample object of the specified ``type_`` using the default
+        attributes for that type in this :class:`Collection`.
+
+        The ``attrs`` mapping will be overlayed onto the sample attributes
+        before being used with ``type_`` to instantiate and return a new
+        sample object.
+        """
         computed_attrs = dict(self[type_])
         for key, value in computed_attrs.items():
             if value in self:
