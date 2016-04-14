@@ -1,11 +1,7 @@
 chide documentation
 ==========================
 
-This is a Python library for building a configuration object
-from one or more `YAML`__ files validated using a `schema`__.
-
-__ http://pyyaml.org/
-__ https://pypi.python.org/pypi/voluptuous
+Quickly create sample objects from data.
 
 .. toctree::
    :maxdepth: 3
