@@ -30,9 +30,11 @@ setup(
         test=[
             'coveralls',
             'jinja2',
+            'manuel',
             'mock',
             'nose',
             'nose-cov',
+            'nose-fixes',
             'sqlalchemy',
             'testfixtures',
             ],
