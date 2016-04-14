@@ -1,0 +1,29 @@
+language: python
+
+# for container-y goodness:
+sudo: false
+
+python:
+  - "2.7"
+  - "3.4"
+  - "3.5"
+
+install:
+  - "pip install -Ue .[test,build]"
+
+# command to run tests, e.g. python setup.py test
+script: coverage run --source chide -m nose
+
+after_success:
+  - coveralls
+
+deploy:
+  provider: pypi
+  user: chrisw
+  password:
+    secure: x
+  on:
+    tags: true
+    repo: cjw296/chide
+  skip_cleanup: true
+  distributions: "sdist bdist_wheel"
