@@ -7,6 +7,7 @@ Quickly create sample objects from data.
    :maxdepth: 3
 
    use.rst
+   sqlalchemy.rst
    api.rst
    development.rst
    changes.rst
