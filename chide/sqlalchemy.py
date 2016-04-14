@@ -21,7 +21,7 @@ class Collection(BaseCollection):
         It's called internally, so you don't have to worry about it.
         """
         mapper = inspect(type_)
-        key = []
+        key = [type_]
         for prop in mapper._identity_key_props:
             value = attrs.get(prop.key)
             if value is None:
