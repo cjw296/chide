@@ -182,3 +182,37 @@ class TestSQLAlchemyCollection(TestCase):
 
         obj2 = collection.make(Model)
         compare(obj2.value, expected='two')
+
+    def test_relationship_with_backrefs(self):
+        Base = declarative_base()
+
+        class Bar(Base):
+            __tablename__ = 'bar'
+            id = Column(Integer, primary_key=True)
+            value = Column(Integer)
+
+        class Foo(Base):
+            __tablename__ = 'foo'
+            id = Column(Integer, primary_key=True)
+            bar_id = Column(String, ForeignKey('bar.id'))
+            bar = relationship('Bar', backref='foos')
+
+        class Baz(Base):
+            __tablename__ = 'baz'
+            id = Column(Integer, primary_key=True)
+            foo_id = Column(String, ForeignKey('foo.id'))
+            foo = relationship('Foo')
+
+        collection = Collection({
+            Bar: {'id': 1, 'value': 2},
+            Foo: {'id': 3, 'bar': Bar, 'bar_id': 1},
+            Baz: {'id': 4, 'foo': Foo, 'foo_id': 3}
+        })
+        samples = Set(collection)
+
+        session = self.make_session(Base)
+
+        session.add(samples.get(Baz, id=5, foo=samples.get(Foo, id=7)))
+        session.commit()
+
+        compare(session.query(Foo.id).all(), expected=[(7, )])
