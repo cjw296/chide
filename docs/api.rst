@@ -2,7 +2,7 @@ API Reference
 =============
 
 .. automodule:: chide
-  :members: Collection
+  :members: Collection, Set
 
 .. automodule:: chide.sqlalchemy
   :members:

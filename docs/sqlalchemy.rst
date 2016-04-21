@@ -1,7 +1,7 @@
 Use with SQLAlchemy
 ===================
 
-:mod:`chide` has a special collection subclass that helps to make sure
+:mod:`chide` has a special :class:`~chide.Set` subclass that helps to make sure
 only one sample object is created with a particular primary key in any
 one table.
 
@@ -34,11 +34,11 @@ For example, given these two models:
 
     Base.metadata.create_all(engine)
 
-We can set up a registry of sample values as follows:
+We can set up a collection of sample values as follows:
 
 .. code-block:: python
 
-    from chide.sqlalchemy import Collection
+    from chide import Collection
 
     samples = Collection({
         Parent: {'id': 1, 'child': Child},
@@ -65,13 +65,16 @@ This gives us a parent and a child:
     session.query(Child).delete()
     session.commit()
 
-Where :class:`~chide.sqlalchemy.Collection` helps is that if we create multiple
-parent objects, we don't have to worry about clashing children being created
-by mistake:
+If we create multiple parent objects and don't want to have to worry about
+clashing children being created by mistake, we can use a
+:class:`chide.sqlalchemy.Set` to make sure that we only have one sample
+object with a given primary key at any time:
 
+>>> from chide.sqlalchemy import Set
+>>> current_samples = Set(samples)
 >>> session = Session()
->>> session.add(samples.make(Parent, id=1))
->>> session.add(samples.make(Parent, id=2))
+>>> session.add(current_samples.get(Parent, id=1))
+>>> session.add(current_samples.get(Parent, id=2))
 >>> session.commit()
 
 This gives us two parents that both point to the same child:
@@ -91,8 +94,8 @@ True
 Of course, if we want different children, that's easy too:
 
 >>> session = Session()
->>> session.add(samples.make(Parent, id=3, child=samples.make(Child, id=None, value=6)))
->>> session.add(samples.make(Parent, id=4, child=samples.make(Child, id=None, value=7)))
+>>> session.add(current_samples.get(Parent, id=3, child=Child(value=6)))
+>>> session.add(current_samples.get(Parent, id=4, child=Child(value=7)))
 >>> session.commit()
 
 The children's primary keys will be created by the database, but the values are

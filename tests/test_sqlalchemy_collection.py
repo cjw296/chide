@@ -2,11 +2,13 @@ from unittest import TestCase
 
 from sqlalchemy import Column, String, create_engine, ForeignKey
 from sqlalchemy import Integer
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
-from testfixtures import compare
+from testfixtures import compare, ShouldRaise
 
-from chide.sqlalchemy import Collection
+from chide import Collection
+from chide.sqlalchemy import Set
 from .helpers import Comparable
 
 
@@ -18,8 +20,7 @@ class TestSQLAlchemyCollection(TestCase):
         base.metadata.create_all(engine)
         return Session()
 
-    def test_simple_model(self):
-
+    def make_all(self):
         Base = declarative_base()
 
         class Model(Comparable, Base):
@@ -28,20 +29,39 @@ class TestSQLAlchemyCollection(TestCase):
             value = Column(String)
 
         samples = Collection({Model: {'id': 1, 'value': 'two'}})
+        session = self.make_session(Base)
+
+        return Model, samples, session
+
+    def test_simple_model(self):
+        Model, samples, session = self.make_all()
 
         model1 = samples.make(Model)
         model2 = samples.make(Model)
-        self.assertTrue(model1 is model2)
+        self.assertFalse(model1 is model2)
 
-        session = self.make_session(Base)
-        session.add(samples.make(Model))
         session.add(samples.make(Model))
         session.commit()
 
         model = session.query(Model).one()
         compare(Model(id=1, value='two'), actual=model)
 
-    def test_foreign_key(self):
+    def test_simple_model_with_session(self):
+        Model, samples, session = self.make_all()
+
+        samples = Set(samples)
+        model1 = samples.get(Model)
+        model2 = samples.get(Model)
+        self.assertTrue(model1 is model2)
+
+        session.add(samples.get(Model))
+        session.add(samples.get(Model))
+        session.commit()
+
+        model = session.query(Model).one()
+        compare(Model(id=1, value='two'), actual=model)
+
+    def test_foreign_key_no_session(self):
 
         Base = declarative_base()
 
@@ -63,6 +83,35 @@ class TestSQLAlchemyCollection(TestCase):
 
         parent1 = samples.make(Parent, id=1)
         parent2 = samples.make(Parent, id=2)
+        session = self.make_session(Base)
+        session.add(parent1)
+        session.add(parent2)
+        with ShouldRaise(IntegrityError):
+            session.commit()
+
+    def test_foreign_key_with_session(self):
+
+        Base = declarative_base()
+
+        class Parent(Comparable, Base):
+            __tablename__ = 'parent'
+            id = Column(Integer, primary_key=True)
+            child_id = Column(Integer, ForeignKey('child.id'))
+            child = relationship('Child')
+
+        class Child(Comparable, Base):
+            __tablename__ = 'child'
+            id = Column(Integer, primary_key=True)
+            value = Column(String)
+
+        collection = Collection({
+            Parent: {'id': 1, 'child': Child},
+            Child: {'id': 3, 'value': 'Foo'}
+        })
+
+        samples = Set(collection)
+        parent1 = samples.get(Parent, id=1)
+        parent2 = samples.get(Parent, id=2)
         self.assertFalse(parent1 is parent2)
         session = self.make_session(Base)
         session.add(parent1)
@@ -74,12 +123,7 @@ class TestSQLAlchemyCollection(TestCase):
 
     def test_null_primary_key(self):
 
-        Base = declarative_base()
-
-        class Model(Comparable, Base):
-            __tablename__ = 'model'
-            id = Column(Integer, primary_key=True)
-            value = Column(String)
+        Model, _, session = self.make_all()
 
         samples = Collection({Model: {'value': 'two'}})
 
@@ -87,7 +131,6 @@ class TestSQLAlchemyCollection(TestCase):
         model2 = samples.make(Model)
         self.assertFalse(model1 is model2)
 
-        session = self.make_session(Base)
         session.add(model1)
         session.add(model2)
         session.commit()
@@ -95,3 +138,47 @@ class TestSQLAlchemyCollection(TestCase):
         models = session.query(Model).all()
         compare(len(set(m.id for m in models)), expected=2)
         compare(set(m.value for m in models), expected={'two'})
+
+    def test_null_primary_key_with_set(self):
+
+        Model, _, session = self.make_all()
+
+        collection = Collection({Model: {'value': 'two'}})
+        samples = Set(collection)
+
+        model1 = samples.get(Model)
+        model2 = samples.get(Model)
+        self.assertFalse(model1 is model2)
+
+        session.add(model1)
+        session.add(model2)
+        session.commit()
+
+        models = session.query(Model).all()
+        compare(len(set(m.id for m in models)), expected=2)
+        compare(set(m.value for m in models), expected={'two'})
+
+    def test_closed_session(self):
+
+        Model, samples, session = self.make_all()
+
+        obj1 = samples.make(Model)
+        session.add(obj1)
+        session.commit()
+        session.close()
+
+        obj2 = samples.make(Model)
+        compare(obj2.value, expected='two')
+
+    def test_closed_session_with_set(self):
+
+        Model, collection, session = self.make_all()
+
+        samples = Set(collection)
+        obj1 = samples.get(Model)
+        session.add(obj1)
+        session.commit()
+        session.close()
+
+        obj2 = collection.make(Model)
+        compare(obj2.value, expected='two')

@@ -1,7 +1,7 @@
 from testfixtures import compare, ShouldRaise
 from unittest import TestCase
 
-from chide import Collection
+from chide import Collection, Set
 from .helpers import Comparable
 
 
@@ -29,6 +29,7 @@ def make_type_c():
 
     return TypeC
 
+
 class TestCollection(TestCase):
 
     def test_basic(self):
@@ -39,7 +40,7 @@ class TestCollection(TestCase):
         samples = Collection({TypeA: {'x': 1, 'y': 2}})
         compare(TypeA(1, 3), actual=samples.make(TypeA, y=3))
         # check we don't mutate the sample data!
-        compare(samples[TypeA], expected={'x': 1, 'y': 2})
+        compare(samples.make(TypeA), expected=TypeA(1, 2))
 
     def test_nested(self):
         samples = Collection({
@@ -67,7 +68,7 @@ class TestCollection(TestCase):
         with ShouldRaise(Exception(1)):
             samples.make(TypeC)
 
-    def test_identify(self):
+    def test_identify_and_set(self):
 
         TypeC = make_type_c()
 
@@ -75,9 +76,10 @@ class TestCollection(TestCase):
             self.assertTrue(TypeC is type_)
             return attrs['key']
 
-        samples = Collection({TypeC: {'key': 1}}, identify_type_c)
-        sample1 = samples.make(TypeC)
-        sample2 = samples.make(TypeC)
+        samples = Collection({TypeC: {'key': 1}})
+        set = Set(samples, identify_type_c)
+        sample1 = set.get(TypeC)
+        sample2 = set.get(TypeC)
         self.assertTrue(type(sample1), TypeC)
         compare(sample1.key, expected=1)
         self.assertTrue(sample1 is sample2)
