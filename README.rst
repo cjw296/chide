@@ -17,7 +17,7 @@ Quickly create sample objects from data.
 Chide's philosophy is to give you a super simple registry of parameters
 that are needed to instantiate objects needed in your tests. You'll
 hopefully only need this when you have objects that are onerous to set up
-as a result of having lots of required parameters to the need to create
+as a result of having lots of required parameters needed to create
 a whole tree of objects for each test.
 
 Here's a tiny example...
