@@ -9,7 +9,7 @@ base_dir = os.path.dirname(__file__)
 
 setup(
     name='chide',
-    version='1.0.2',
+    version='2.0.0',
     author='Chris Withers',
     author_email='chris@withers.org',
     license='MIT',
