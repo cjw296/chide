@@ -1,5 +1,5 @@
 chide documentation
-==========================
+===================
 
 Quickly create sample objects from data.
 
