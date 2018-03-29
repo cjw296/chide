@@ -4,7 +4,7 @@ Changes
 2.0.1 (16 Jun 2016)
 -------------------
 
-- Fx nasty bug when using with :mod:`sqlalchemy` where related objects could get
+- Fix nasty bug when using with :mod:`sqlalchemy` where related objects could get
   added to the session even though they were never requested, as a result of
   a backref on a third model.
 
