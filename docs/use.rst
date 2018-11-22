@@ -149,3 +149,31 @@ This because the :func:`identify` function above returns ``None`` for all types
 other than :class:`Address`. Returning ``None`` from :func:`identify` is the
 way to indicate that a new object should be returned, regardless of the
 attributes it has.
+
+Creating attributes for objects
+--------------------------------
+
+Given this collection:
+
+.. code-block:: python
+
+  from chide import Collection
+
+  samples = Collection({
+      ClassOne: {'x': 1, 'y': 2},
+      ClassTwo: {'a': 1, 'b': ClassOne},
+  })
+
+We can also create attributes to make a sample object:
+
+>>> attrs = samples.attributes(ClassOne)
+>>> attrs['x']
+1
+>>> attrs['y']
+2
+
+>>> attrs = samples.attributes(ClassTwo)
+>>> attrs['a']
+1
+>>> attrs['b']
+<ClassOne object at ...>

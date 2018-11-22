@@ -19,7 +19,7 @@ class Collection(object):
         computed_attrs.update(attrs)
         return computed_attrs
 
-    def make(self, type_, **attrs):
+    def attributes(self, type_, **attrs):
         """
         Make a sample object of the specified ``type_`` using the default
         attributes for that type in this :class:`Collection`.
@@ -28,4 +28,14 @@ class Collection(object):
         before being used with ``type_`` to instantiate and return a new
         sample object.
         """
-        return type_(**self._attrs(type_, attrs, self.make))
+        return self._attrs(type_, attrs, self.make)
+
+    def make(self, type_, **attrs):
+        """
+        Make the attributes for a sample object of the specified ``type_``
+        using the default attributes for that type in this :class:`Collection`.
+
+        The ``attrs`` mapping will be overlayed onto the sample attributes
+        and returned as a :class:`dict`.
+        """
+        return type_(**self.attributes(type_, **attrs))
