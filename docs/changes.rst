@@ -1,6 +1,11 @@
 Changes
 =======
 
+2.1.1 (9 Jan 2019)
+-------------------
+
+-  Exclude tests from distribution.
+
 2.1.0 (22 Nov 2018)
 -------------------
 
