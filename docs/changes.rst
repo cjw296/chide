@@ -1,6 +1,12 @@
 Changes
 =======
 
+2.1.2 (31 Jan 2019)
+-------------------
+
+- Fix bug in :class:`~chide.Collection` occurring when sample attributes were
+  not hashable.
+
 2.1.1 (9 Jan 2019)
 -------------------
 
