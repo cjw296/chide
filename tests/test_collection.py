@@ -84,3 +84,9 @@ class TestCollection(TestCase):
         compare(sample1.key, expected=1)
         self.assertTrue(sample1 is sample2)
 
+    def test_unhashable_attributes(self):
+        unhashable = []
+        collection = Collection({dict: {'y': unhashable}})
+        made = collection.make(dict)
+        compare(made, expected={'y': []})
+        assert made['y'] is unhashable

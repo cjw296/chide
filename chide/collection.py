@@ -14,7 +14,11 @@ class Collection(object):
     def _attrs(self, type_, attrs, nest):
         computed_attrs = dict(self.mapping[type_])
         for key, value in computed_attrs.items():
-            if value in self.mapping and key not in attrs:
+            try:
+                value_in_mapping = value in self.mapping
+            except TypeError:
+                value_in_mapping = False
+            if value_in_mapping and key not in attrs:
                 computed_attrs[key] = nest(value)
         computed_attrs.update(attrs)
         return computed_attrs
