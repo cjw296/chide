@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-import sys, os, pkginfo, datetime
+import os, pkginfo, datetime, time
 
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 pkg_info = pkginfo.Develop(os.path.join(os.path.dirname(__file__),'..'))
+build_date = datetime.datetime.utcfromtimestamp(int(os.environ.get('SOURCE_DATE_EPOCH', time.time())))
 
 intersphinx_mapping = {'http://docs.python.org': None}
 
@@ -15,7 +16,7 @@ extensions = [
 source_suffix = '.rst'
 master_doc = 'index'
 project = pkg_info.name
-copyright = '%s Chris Withers' % datetime.datetime.now().year
+copyright = '2016 - %s Chris Withers' % build_date.year
 version = release = pkg_info.version
 exclude_patterns = [
     'description.rst',
