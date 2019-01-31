@@ -14,7 +14,7 @@ class TestSet(TestCase):
         with ShouldRaise(TypeError('No identify callable supplied')):
             Set(self.collection)
 
-    def test_identity_suppled(self):
+    def test_identity_supplied(self):
         def identify(type_, attrs):
             return attrs['x']
         samples = Set(self.collection, identify)
