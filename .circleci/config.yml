@@ -1,0 +1,83 @@
+version: 2.1
+
+orbs:
+  python: cjw296/python-ci@4.1
+
+jobs:
+  check-package:
+    parameters:
+      extra_package:
+        type: string
+        default: ""
+      imports:
+        type: string
+        default: "chide"
+    docker:
+      - image: cimg/python:3.12
+    steps:
+      - python/check-package:
+          package: "chide"
+          extra_packages: <<  parameters.extra_package >>
+          test:
+          - run:
+              name: "Check Imports"
+              command: python -c "import << parameters.imports >>"
+
+common: &common
+  jobs:
+    - python/pip-run-tests:
+        matrix:
+          parameters:
+            image:
+              - cimg/python:3.11
+              - cimg/python:3.12
+
+    - python/coverage:
+        name: coverage
+        image: cimg/python:3.12
+        requires:
+          - python/pip-run-tests
+
+    - python/pip-docs:
+        name: docs
+        requires:
+          - coverage
+
+    - python/pip-setuptools-build-package:
+        name: package
+        requires:
+          - docs
+
+    - check-package:
+        name: check-package-python
+        requires:
+          - package
+
+    - check-package:
+        name: check-package-python-sqlalchemy
+        extra_package: sqlalchemy
+        imports: "chide, chide.sqlalchemy"
+        requires:
+          - package
+
+    - python/release:
+        name: release
+        config: .carthorse.yml
+        requires:
+          - check-package-python
+          - check-package-python-sqlalchemy
+        filters:
+          branches:
+            only: master
+
+workflows:
+  push:
+    <<: *common
+  periodic:
+    <<: *common
+    triggers:
+      - schedule:
+          cron: "0 0 * * 2"
+          filters:
+            branches:
+              only: master
