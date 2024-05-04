@@ -7,6 +7,8 @@ from setuptools import setup, find_packages
 
 base_dir = os.path.dirname(__file__)
 
+optionals = ['sqlalchemy']
+
 setup(
     name='chide',
     version='2.1.2',
@@ -30,10 +32,17 @@ setup(
         test=[
             'pytest',
             'pytest-cov',
-            'sqlalchemy',
             'sybil',
             'testfixtures',
-            ],
-        build=['sphinx', 'pkginfo', 'setuptools-git', 'twine', 'wheel']
+        ] + optionals,
+        docs=[
+            'furo',
+            'sphinx',
+        ] + optionals,
+        build=[
+            'setuptools-git',
+            'twine',
+            'wheel'
+        ]
     ),
 )
