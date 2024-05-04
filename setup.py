@@ -14,7 +14,7 @@ setup(
     author_email='chris@withers.org',
     license='MIT',
     description="Quickly create sample objects from data.",
-    long_description=open('docs/description.rst').read(),
+    long_description=open(os.path.join(base_dir, 'README.rst')).read(),
     url='https://github.com/cjw296/chide',
     classifiers=[
         'Development Status :: 5 - Production/Stable',

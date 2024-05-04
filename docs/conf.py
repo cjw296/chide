@@ -1,31 +1,32 @@
 # -*- coding: utf-8 -*-
-import os, pkginfo, datetime, time
+import os, datetime, time
+from importlib import metadata
 
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
-pkg_info = pkginfo.Develop(os.path.join(os.path.dirname(__file__),'..'))
 build_date = datetime.datetime.utcfromtimestamp(int(os.environ.get('SOURCE_DATE_EPOCH', time.time())))
-
-intersphinx_mapping = {'http://docs.python.org': None}
 
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx.ext.intersphinx'
+    'sphinx.ext.intersphinx',
     ]
+
+intersphinx_mapping = {
+    'python': ('http://docs.python.org', None),
+    'sqlalchemy': ('https://docs.sqlalchemy.org/en/20/', None),
+}
+
 
 # General
 source_suffix = '.rst'
 master_doc = 'index'
-project = pkg_info.name
+project = 'chide'
 copyright = '2016 - %s Chris Withers' % build_date.year
-version = release = pkg_info.version
-exclude_patterns = [
-    'description.rst',
-    '_build'
-]
+version = release = metadata.version(project)
+exclude_trees = ['_build']
 pygments_style = 'sphinx'
 
 # Options for HTML output
-html_theme = 'default' if on_rtd else 'classic'
+html_theme = 'furo'
 htmlhelp_basename = project+'doc'
 
 # Options for LaTeX output
@@ -34,3 +35,8 @@ latex_documents = [
    'Chris Withers', 'manual'),
 ]
 
+nitpicky = True
+nitpick_ignore = [
+    ('py:class', 'Address'),  # documentation example
+    ('py:func', 'identify'),  # documentation example
+]
