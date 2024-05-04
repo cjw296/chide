@@ -20,14 +20,12 @@ setup(
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
     ],
     packages=find_packages(exclude=['tests']),
     zip_safe=False,
     include_package_data=True,
+    python_requires=">=3.11",
     extras_require=dict(
         test=[
             'coveralls',
