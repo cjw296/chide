@@ -28,14 +28,10 @@ setup(
     python_requires=">=3.11",
     extras_require=dict(
         test=[
-            'coveralls',
-            'jinja2',
-            'manuel',
-            'mock',
-            'nose',
-            'nose-cov',
-            'nose-fixes',
+            'pytest',
+            'pytest-cov',
             'sqlalchemy',
+            'sybil',
             'testfixtures',
             ],
         build=['sphinx', 'pkginfo', 'setuptools-git', 'twine', 'wheel']
