@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from testfixtures import compare, ShouldRaise
+from testfixtures import compare, ShouldRaise, ShouldAssert
 
 from chide import Collection, Set
 
@@ -32,11 +32,18 @@ class TestSet(TestCase):
         self.assertTrue(obj1 is obj2)
 
     def test_identity_supplied_trumps_subclass(self):
+
         class MySet(Set):
-            def identify(type_, attrs):
-                return attrs['x']
+            def identify(self, type_, attrs):
+                raise AssertionError('should not be called')
+
+        unusable = MySet(self.collection)
+        with ShouldAssert('should not be called'):
+            unusable.get(dict, x=1, y=1)
+
         def identify(type_, attrs):
             return attrs['y']
+
         samples = MySet(self.collection, identify)
         obj1 = samples.get(dict, x=1, y=1)
         compare(obj1, expected={'x': 1, 'y': 1})
