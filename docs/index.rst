@@ -1,7 +1,4 @@
-chide documentation
-===================
-
-Quickly create sample objects from data.
+.. include:: ../README.rst
 
 .. toctree::
    :maxdepth: 3
