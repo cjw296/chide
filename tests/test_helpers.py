@@ -6,9 +6,9 @@ from .helpers import Comparable
 
 
 class Sample(Comparable):
-    def __init__(self):
+    def __init__(self) -> None:
         self.x = 1
 
 
-def test_comparable_repr():
+def test_comparable_repr() -> None:
     compare(repr(Sample()), expected='<Sample: x=1>')

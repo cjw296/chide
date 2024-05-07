@@ -32,6 +32,11 @@ common: &common
               - cimg/python:3.11
               - cimg/python:3.12
 
+    - python/typing:
+        name: typing
+        packages: chide tests
+        image: cimg/python:3.12
+
     - python/coverage:
         name: coverage
         image: cimg/python:3.12
@@ -64,6 +69,7 @@ common: &common
         name: release
         config: .carthorse.yml
         requires:
+          - typing
           - check-package-python
           - check-package-python-sqlalchemy
         filters:

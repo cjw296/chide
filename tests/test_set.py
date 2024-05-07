@@ -1,3 +1,4 @@
+from typing import Type, Any, Hashable
 from unittest import TestCase
 
 from testfixtures import compare, ShouldRaise, ShouldAssert
@@ -7,42 +8,48 @@ from chide import Collection, Set
 
 class TestSet(TestCase):
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.collection = Collection({dict: {}})
 
-    def test_no_identify(self):
+    def test_no_identify(self) -> None:
         with ShouldRaise(TypeError('No identify callable supplied')):
             Set(self.collection)
 
-    def test_identity_supplied(self):
-        def identify(type_, attrs):
-            return attrs['x']
+    def test_identity_supplied(self) -> None:
+        def identify(type_: Type[Any], attrs: dict[str, Any]) -> int:
+            key = attrs['x']
+            assert isinstance(key, int)
+            return key
         samples = Set(self.collection, identify)
         obj1 = samples.get(dict, x=1)
         obj2 = samples.get(dict, x=1)
         self.assertTrue(obj1 is obj2)
 
-    def test_identity_subclass(self):
+    def test_identity_subclass(self) -> None:
         class MySet(Set):
-            def identify(self, type_, attrs):
-                return attrs['x']
+            def identify(self, type_: Type[Any], attrs: dict[str, Any]) -> int:
+                key = attrs['x']
+                assert isinstance(key, int)
+                return key
         samples = MySet(self.collection)
         obj1 = samples.get(dict, x=1)
         obj2 = samples.get(dict, x=1)
         self.assertTrue(obj1 is obj2)
 
-    def test_identity_supplied_trumps_subclass(self):
+    def test_identity_supplied_trumps_subclass(self) -> None:
 
         class MySet(Set):
-            def identify(self, type_, attrs):
+            def identify(self, type_: Type[Any], attrs: dict[str, Any]) -> int:
                 raise AssertionError('should not be called')
 
         unusable = MySet(self.collection)
         with ShouldAssert('should not be called'):
             unusable.get(dict, x=1, y=1)
 
-        def identify(type_, attrs):
-            return attrs['y']
+        def identify(type_: Type[Any], attrs: dict[str, Any]) -> int:
+            key = attrs['y']
+            assert isinstance(key, int)
+            return key
 
         samples = MySet(self.collection, identify)
         obj1 = samples.get(dict, x=1, y=1)
@@ -55,11 +62,12 @@ class TestSet(TestCase):
         compare(obj4, expected={'x': 2, 'y': 3})
         self.assertTrue(obj3 is obj4)
 
-    def test_identify_returns_none(self):
-        def identify(type_, attrs):
+    def test_identify_returns_none(self) -> None:
+        def identify(type_: Type[Any], attrs: dict[str, Any]) -> int | None:
             key = attrs['x']
             if not key:
                 return None
+            assert isinstance(key, int)
             return key
         samples = Set(self.collection, identify)
         obj1 = samples.get(dict, x=1)

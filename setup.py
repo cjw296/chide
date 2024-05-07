@@ -30,6 +30,7 @@ setup(
     python_requires=">=3.11",
     extras_require=dict(
         test=[
+            'mypy',
             'pytest',
             'pytest-cov',
             'sybil',
