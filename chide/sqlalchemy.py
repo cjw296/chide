@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 
+from typing import Any, Type
+
 from sqlalchemy import inspect
 
 from .set import Set as BaseSet
@@ -12,7 +14,7 @@ class Set(BaseSet):
     """
 
     @staticmethod
-    def identify(type_, attrs):
+    def identify(type_: Type[Any], attrs: dict[str, Any]) -> tuple[Any, ...] | None:
         """
         This method returns the primary key that will be used for the
         returned object, meaning that only one sample object will exist

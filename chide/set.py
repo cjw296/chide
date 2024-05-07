@@ -1,4 +1,14 @@
-class Set(dict):
+from typing import Any, TypeVar, Type, Callable, TypeAlias, Hashable
+
+from chide import Collection
+
+T = TypeVar('T')
+
+
+Identifier: TypeAlias = Callable[[Type[Any], dict[str, Any]], Hashable | None]
+
+
+class Set:
     """
     A collection of sample objects where only one object with
     a given identity may exist at one time.
@@ -29,15 +39,17 @@ class Set(dict):
     #: You may also want to subclass :class:`Set` and implement
     #: an :meth:`identify` method, see :class:`chide.sqlalchemy.Set`
     #: for an example.
-    identify = None
+    identify: Identifier
 
-    def __init__(self, collection, identify=None):
+    def __init__(self, collection: Collection, identify: Identifier | None = None) -> None:
         self.collection = collection
-        self.identify = identify or self.identify
-        if self.identify is None:
+        identify = identify or getattr(self, 'identify', None)
+        if identify is None:
             raise TypeError('No identify callable supplied')
+        self.identify = identify
+        self.objects: dict[Hashable, Any] = {}
 
-    def get(self, type_, **attrs):
+    def get(self, type_: Type[T], **attrs: Any) -> T:
         """
         Return an appropriate sample object of the specified ``type_``.
 
@@ -53,8 +65,8 @@ class Set(dict):
         key = self.identify(type_, attrs)
         if key is None:
             return type_(**attrs)
-        obj = super(Set, self).get(key)
+        obj = self.objects.get(key)
         if obj is None:
             obj = type_(**attrs)
-            self[key] = obj
+            self.objects[key] = obj
         return obj

@@ -1,12 +1,15 @@
+from typing import Any
+
+
 class Comparable:
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return '<{}: {}>'.format(
             type(self).__name__,
             ', '.join(k+'='+repr(v) for (k, v) in sorted(vars(self).items()))
         )
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         self_vars = dict((k, v) for (k, v) in vars(self).items()
                          if not k.startswith('_'))
         other_vars = dict((k, v) for (k, v) in vars(other).items()

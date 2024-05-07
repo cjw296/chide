@@ -1,10 +1,12 @@
+from typing import Type, Protocol
 from unittest import TestCase
 
 from sqlalchemy import Column, String, create_engine, ForeignKey
 from sqlalchemy import Integer
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.orm import (
+    sessionmaker, relationship, DeclarativeBase, Session, Mapped, mapped_column
+)
 from testfixtures import compare, ShouldRaise
 
 from chide import Collection
@@ -12,28 +14,31 @@ from chide.sqlalchemy import Set
 from .helpers import Comparable
 
 
+class Base(DeclarativeBase): pass
+
+
+class Model(Comparable, Base):
+    __tablename__ = 'model'
+    id: Mapped[int] = mapped_column('id_', primary_key=True)
+    value: Mapped[str]
+
+
 class TestSQLAlchemyCollection(TestCase):
 
-    def make_session(self, base):
+    def make_session(self, base: Type[DeclarativeBase]) -> Session:
         engine = create_engine('sqlite:///:memory:')
         Session = sessionmaker(bind=engine)
         base.metadata.create_all(engine)
         return Session()
 
-    def make_all(self):
-        Base = declarative_base()
-
-        class Model(Comparable, Base):
-            __tablename__ = 'model'
-            id = Column('id_', Integer, primary_key=True)
-            value = Column(String)
+    def make_all(self) -> tuple[Type['Model'], Collection, Session]:
 
         samples = Collection({Model: {'id': 1, 'value': 'two'}})
         session = self.make_session(Base)
 
         return Model, samples, session
 
-    def test_simple_model(self):
+    def test_simple_model(self) -> None:
         Model, samples, session = self.make_all()
 
         model1 = samples.make(Model)
@@ -46,10 +51,10 @@ class TestSQLAlchemyCollection(TestCase):
         model = session.query(Model).one()
         compare(Model(id=1, value='two'), actual=model)
 
-    def test_simple_model_with_session(self):
-        Model, samples, session = self.make_all()
+    def test_simple_model_with_session(self) -> None:
+        Model, samples_, session = self.make_all()
 
-        samples = Set(samples)
+        samples = Set(samples_)
         model1 = samples.get(Model)
         model2 = samples.get(Model)
         self.assertTrue(model1 is model2)
@@ -61,9 +66,9 @@ class TestSQLAlchemyCollection(TestCase):
         model = session.query(Model).one()
         compare(Model(id=1, value='two'), actual=model)
 
-    def test_foreign_key_no_session(self):
+    def test_foreign_key_no_session(self) -> None:
 
-        Base = declarative_base()
+        class Base(DeclarativeBase): pass
 
         class Parent(Comparable, Base):
             __tablename__ = 'parent'
@@ -89,9 +94,9 @@ class TestSQLAlchemyCollection(TestCase):
         with ShouldRaise(IntegrityError):
             session.commit()
 
-    def test_foreign_key_with_session(self):
+    def test_foreign_key_with_session(self) -> None:
 
-        Base = declarative_base()
+        class Base(DeclarativeBase): pass
 
         class Parent(Comparable, Base):
             __tablename__ = 'parent'
@@ -121,7 +126,7 @@ class TestSQLAlchemyCollection(TestCase):
         model = session.query(Child).one()
         compare(Child(id=3, value='Foo'), actual=model)
 
-    def test_null_primary_key(self):
+    def test_null_primary_key(self) -> None:
 
         Model, _, session = self.make_all()
 
@@ -139,7 +144,7 @@ class TestSQLAlchemyCollection(TestCase):
         compare(len(set(m.id for m in models)), expected=2)
         compare(set(m.value for m in models), expected={'two'})
 
-    def test_null_primary_key_with_set(self):
+    def test_null_primary_key_with_set(self) -> None:
 
         Model, _, session = self.make_all()
 
@@ -158,7 +163,7 @@ class TestSQLAlchemyCollection(TestCase):
         compare(len(set(m.id for m in models)), expected=2)
         compare(set(m.value for m in models), expected={'two'})
 
-    def test_closed_session(self):
+    def test_closed_session(self) -> None:
 
         Model, samples, session = self.make_all()
 
@@ -170,7 +175,7 @@ class TestSQLAlchemyCollection(TestCase):
         obj2 = samples.make(Model)
         compare(obj2.value, expected='two')
 
-    def test_closed_session_with_set(self):
+    def test_closed_session_with_set(self) -> None:
 
         Model, collection, session = self.make_all()
 
@@ -183,8 +188,8 @@ class TestSQLAlchemyCollection(TestCase):
         obj2 = collection.make(Model)
         compare(obj2.value, expected='two')
 
-    def test_relationship_with_backrefs(self):
-        Base = declarative_base()
+    def test_relationship_with_backrefs(self) -> None:
+        class Base(DeclarativeBase): pass
 
         class Bar(Base):
             __tablename__ = 'bar'
