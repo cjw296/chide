@@ -38,5 +38,7 @@ latex_documents = [
 nitpicky = True
 nitpick_ignore = [
     ('py:class', 'Address'),  # documentation example
+    ('py:class', 'chide.collection.T'),  # type var
+    ('py:class', 'chide.set.T'),  # type var
     ('py:func', 'identify'),  # documentation example
 ]
