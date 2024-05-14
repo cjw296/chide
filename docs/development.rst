@@ -3,15 +3,6 @@ Development
 
 .. highlight:: bash
 
-This package is developed using continuous integration which can be
-found here:
-
-https://travis-ci.org/cjw296/chide
-
-The latest development version of the documentation can be found here:
-
-http://chide.readthedocs.org/en/latest/
-
 If you wish to contribute to this project, then you should fork the
 repository found here:
 
@@ -23,27 +14,28 @@ instructions to perform various development tasks:
 Setting up a virtualenv
 -----------------------
 
-The recommended way to set up a development environment is to turn
-your checkout into a virtualenv and then install the package in
-editable form as follows::
+The recommended way to set up a development environment is to create
+a virtualenv and then install the package in editable form as follows::
 
-  $ virtualenv .
-  $ bin/pip install -U -e .[test,build]
+  $ python3 -m venv ~/virtualenvs/chide
+  $ source ~/virtualenvs/chide/bin/activate
+  $ pip install -U pip setuptools
+  $ pip install -U -e .[test,build]
 
 Running the tests
 -----------------
 
-Once you've set up a virtualenv, the tests can be run as follows::
+Once you've set up a virtualenv, the tests can be run in the activated
+virtualenv and from the root of a source checkout as follows::
 
-  $ bin/nosetests
+  $ pytest
 
 Building the documentation
 --------------------------
 
 The Sphinx documentation is built by doing the following from the
-directory containing setup.py::
+directory containing ``setup.py``::
 
-  $ source bin/activate
   $ cd docs
   $ make html
 
@@ -54,21 +46,9 @@ do the following::
 
 The resulting ``desc.html`` should be checked by opening in a browser.
 
-To check that the README that will be used on GitHub renders properly,
-do the following::
-
-  $ cat README.rst | rst2html.py > readme.html
-
-The resulting ``readme.html`` should be checked by opening in a browser.
-
 Making a release
 ----------------
 
-To make a release, just update the version in ``setup.py``,
-update the change log, tag it
-and push to https://github.com/cjw296/chide
-and Travis CI should take care of the rest.
-
-Once Travis CI is done, make sure to go to
-https://readthedocs.org/projects/chide/versions/
-and make sure the new release is marked as an Active Version.
+To make a release, just update ``version.txt``, update the change log
+and push to https://github.com/cjw296/chide.
+Carthorse should take care of the rest.
