@@ -4,6 +4,7 @@ from unittest import TestCase
 from testfixtures import compare, ShouldRaise, ShouldAssert
 
 from chide import Collection, Set
+from chide.typing import Attrs
 
 
 class TestSet(TestCase):
@@ -16,7 +17,7 @@ class TestSet(TestCase):
             Set(self.collection)
 
     def test_identity_supplied(self) -> None:
-        def identify(type_: Type[Any], attrs: dict[str, Any]) -> int:
+        def identify(type_: Type[Any], attrs: Attrs) -> int:
             key = attrs['x']
             assert isinstance(key, int)
             return key
@@ -27,7 +28,7 @@ class TestSet(TestCase):
 
     def test_identity_subclass(self) -> None:
         class MySet(Set):
-            def identify(self, type_: Type[Any], attrs: dict[str, Any]) -> int:
+            def identify(self, type_: Type[Any], attrs: Attrs) -> int:
                 key = attrs['x']
                 assert isinstance(key, int)
                 return key
@@ -39,14 +40,14 @@ class TestSet(TestCase):
     def test_identity_supplied_trumps_subclass(self) -> None:
 
         class MySet(Set):
-            def identify(self, type_: Type[Any], attrs: dict[str, Any]) -> int:
+            def identify(self, type_: Type[Any], attrs: Attrs) -> int:
                 raise AssertionError('should not be called')
 
         unusable = MySet(self.collection)
         with ShouldAssert('should not be called'):
             unusable.get(dict, x=1, y=1)
 
-        def identify(type_: Type[Any], attrs: dict[str, Any]) -> int:
+        def identify(type_: Type[Any], attrs: Attrs) -> int:
             key = attrs['y']
             assert isinstance(key, int)
             return key
@@ -63,7 +64,7 @@ class TestSet(TestCase):
         self.assertTrue(obj3 is obj4)
 
     def test_identify_returns_none(self) -> None:
-        def identify(type_: Type[Any], attrs: dict[str, Any]) -> int | None:
+        def identify(type_: Type[Any], attrs: Attrs) -> int | None:
             key = attrs['x']
             if not key:
                 return None

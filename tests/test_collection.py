@@ -4,6 +4,7 @@ from testfixtures import compare, ShouldRaise
 from unittest import TestCase
 
 from chide import Collection, Set
+from chide.typing import Attrs
 from .helpers import Comparable
 
 
@@ -79,7 +80,7 @@ class TestCollection(TestCase):
 
         type_c = make_type_c()
 
-        def identify_type_c(type_: Type[TypeC], attrs: dict[str, Any]) -> int:
+        def identify_type_c(type_: Type[TypeC], attrs: Attrs) -> int:
             self.assertTrue(type_c is type_)
             key = attrs['key']
             assert isinstance(key, int)

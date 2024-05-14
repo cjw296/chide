@@ -1,11 +1,12 @@
 from typing import Any, TypeVar, Type, Callable, TypeAlias, Hashable
 
 from chide import Collection
+from .typing import Attrs
 
 T = TypeVar('T')
 
 
-Identifier: TypeAlias = Callable[[Type[Any], dict[str, Any]], Hashable | None]
+Identifier: TypeAlias = Callable[[Type[Any], Attrs], Hashable | None]
 
 
 class Set:

@@ -1,5 +1,7 @@
 from typing import Type, Any, TypeVar, Callable
 
+from .typing import Attrs
+
 T = TypeVar('T')
 
 
@@ -13,15 +15,15 @@ class Collection:
 
     """
 
-    def __init__(self, mapping: dict[Type[Any], dict[str, Any]]) -> None:
+    def __init__(self, mapping: dict[Type[Any], Attrs]) -> None:
         self.mapping = mapping
 
     def _attrs(
             self,
             type_: Type[Any],
-            attrs: dict[str, Any],
+            attrs: Attrs,
             nest: Callable[[Type[T]], T]
-    ) -> dict[str, Any]:
+    ) -> Attrs:
         computed_attrs = dict(self.mapping[type_])
         for key, value in computed_attrs.items():
             try:
@@ -33,7 +35,7 @@ class Collection:
         computed_attrs.update(attrs)
         return computed_attrs
 
-    def attributes(self, type_: Type[T], **attrs: Any) -> dict[str, Any]:
+    def attributes(self, type_: Type[T], **attrs: Any) -> Attrs:
         """
         Make a sample object of the specified ``type_`` using the default
         attributes for that type in this :class:`Collection`.

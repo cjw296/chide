@@ -5,6 +5,7 @@ from typing import Any, Type
 from sqlalchemy import inspect
 
 from .set import Set as BaseSet
+from .typing import Attrs
 
 
 class Set(BaseSet):
@@ -14,7 +15,7 @@ class Set(BaseSet):
     """
 
     @staticmethod
-    def identify(type_: Type[Any], attrs: dict[str, Any]) -> tuple[Any, ...] | None:
+    def identify(type_: Type[Any], attrs: Attrs) -> tuple[Any, ...] | None:
         """
         This method returns the primary key that will be used for the
         returned object, meaning that only one sample object will exist
