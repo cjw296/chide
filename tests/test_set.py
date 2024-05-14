@@ -1,4 +1,4 @@
-from typing import Type, Any, Hashable
+from typing import Type, Any
 from unittest import TestCase
 
 from testfixtures import compare, ShouldRaise, ShouldAssert

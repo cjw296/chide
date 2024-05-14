@@ -1,4 +1,4 @@
-from typing import Type, Protocol
+from typing import Type
 from unittest import TestCase
 
 from sqlalchemy import Column, String, create_engine, ForeignKey
