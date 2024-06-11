@@ -2,8 +2,10 @@ import builtins
 import re
 from ast import literal_eval
 from enum import Enum, auto
+from io import StringIO
 from textwrap import dedent
 from typing import Protocol, Iterable, Type, Callable, Any, TypeVar, TypeAlias
+import csv
 
 from .typing import Attrs
 
@@ -36,7 +38,7 @@ class Widths(dict[str, int]):
         self[column] = max(len(value), self.get(column, 0))
 
 
-class RenderedRows(list[str]):
+class PrettyRenderedRows(list[str]):
 
     def __init__(self, widths: Widths) -> None:
         super().__init__()
@@ -81,7 +83,7 @@ HEADER = TypeLocation.HEADER
 ROW = TypeLocation.ROW
 
 
-class PrettyFormat(Format):
+class TabularFormat(Format):
 
     header_type_pattern = re.compile(r'([^ (]+) *\((.+)\) *')
 
@@ -116,21 +118,19 @@ class PrettyFormat(Format):
                         handler = getattr(builtins, name)
                     self.column_parse[column] = handler
 
-    def parse(self, text: str) -> list[dict[str, Any]]:
+    def text_to_tuples(self, text: str) -> Iterable[Iterable[str]]:
+        raise NotImplementedError
+
+    def parse(self, text: str) -> list[Attrs]:
         parsed = []
         columns: list[str] | None = None
         types_row_handled = self.types_location is not ROW
         types_row_next = False
-        for line in dedent(text).splitlines():
-            line = line.strip()
-            if not line:
-                continue
-            if line.startswith('+'):
-                if columns is not None and not types_row_handled:
-                    types_row_next = True
-                continue
+        for parts in self.text_to_tuples(text):
 
-            parts = [p.strip() for p in line.split('|')[1:-1]]
+            if columns is not None and not types_row_handled:
+                types_row_next = True
+
             if columns is None:
                 columns = []
                 type_names = {}
@@ -161,56 +161,120 @@ class PrettyFormat(Format):
                 parsed.append(row)
         return parsed
 
-    def render(self, attrs: Iterable[Attrs]) -> str:
-        widths = Widths(self.minimum_column_widths)
-        columns = None
-        types = None
-        rows = []
 
+class RenderedRows(list[dict[str, str]]):
+    columns: list[str] | None = None
+    types: dict[str, str] | None = None
+    header: dict[str, str]
+
+    def __init__(self, attrs: Iterable[Attrs], format_: 'TabularFormat') -> None:
+        super().__init__()
         for attrs_ in attrs:
-            if columns is None:
-                columns = attrs_.keys()
-                for column in columns:
-                    widths.handle(column, column)
-            if types is None:
-                types = {}
+            if self.columns is None:
+                self.columns = list(attrs_.keys())
+            if self.types is None:
+                self.types = {}
                 for column, value in attrs_.items():
                     type_ = type(value)
-                    type_name = self.type_names.get(type_, type(value).__name__)
-                    types[column] = type_name or ''
+                    type_name = format_.type_names.get(type_, type(value).__name__)
+                    self.types[column] = type_name or ''
             row = {}
             for column, value in attrs_.items():
-                handler = self.column_render.get(column)
+                handler = format_.column_render.get(column)
                 if handler is None:
-                    handler = self.type_render.get(type(value), self.default_type_render)
+                    handler = format_.type_render.get(type(value), format_.default_type_render)
                 text = handler(value)
-                widths.handle(column, text)
                 row[column] = text
-            rows.append(row)
+            self.append(row)
 
-        header = {}
-        if columns is not None:
-            for column in columns:
+        self.header = {}
+        if self.columns is not None:
+            for column in self.columns:
                 text = column
-                if types is not None:
-                    type_name = types[column]
-                    if self.types_location is HEADER and type_name:
+                if self.types is not None:
+                    type_name = self.types[column]
+                    if format_.types_location is HEADER and type_name:
                         text = f'{text} ({type_name})'
-                    elif self.types_location is ROW:
-                        widths.handle(column, type_name)
-                header[column] = text
+                self.header[column] = text
+
+
+class PrettyFormat(TabularFormat):
+
+    def __init__(
+            self,
+            type_parse: ParseMapping | None = None,
+            default_type_parse: ValueParse = default_parse,
+            column_parse: ParseMapping | None = None,
+            type_render: TypeRenderMapping | None = None,
+            type_names: TypeNameMapping | None = None,
+            default_type_render: ValueRender = default_render,
+            column_render: ColumnRenderMapping | None = None,
+            types_location: TypeLocation | None = None,
+            minimum_column_widths: dict[str, int] | None = None,
+    ) -> None:
+        super().__init__(
+            type_parse,
+            default_type_parse,
+            column_parse,
+            type_render,
+            type_names,
+            default_type_render,
+            column_render,
+            types_location,
+        )
+        self.minimum_column_widths: dict[str, int] = minimum_column_widths or {}
+
+    def text_to_tuples(self, text: str) -> Iterable[list[str]]:
+        for line in dedent(text).splitlines():
+            line = line.strip()
+            if not line or line.startswith('+'):
+                continue
+            yield [p.strip() for p in line.split('|')[1:-1]]
+
+    def render(self, attrs: Iterable[Attrs]) -> str:
+        widths = Widths(self.minimum_column_widths)
+        rows = RenderedRows(attrs, self)
+
+        if rows.header:
+            for column, text in rows.header.items():
+                widths.handle(column, text)
+        if rows.types is not None and self.types_location is ROW:
+            for column, text in rows.types.items():
+                widths.handle(column, text)
+        for row in rows:
+            for column, text in row.items():
                 widths.handle(column, text)
 
-        rendered = RenderedRows(widths)
+        rendered = PrettyRenderedRows(widths)
         rendered.add_divider()
-        if columns is not None:
-            rendered.add_row(header)
+        if rows.header:
+            rendered.add_row(rows.header)
             rendered.add_divider()
-        if types is not None and self.types_location is ROW:
-            rendered.add_row(types)
+        if rows.types is not None and self.types_location is ROW:
+            rendered.add_row(rows.types)
             rendered.add_divider()
         for row in rows:
             rendered.add_row(row)
         rendered.add_divider()
 
         return rendered.text()
+
+
+class CSVFormat(TabularFormat):
+
+    def text_to_tuples(self, text: str) -> Iterable[list[str]]:
+        return [row for row in csv.reader(StringIO(text))]
+
+    def render(self, attrs: Iterable[Attrs]) -> str:
+        rows = RenderedRows(attrs, self)
+        text = StringIO()
+        writer = csv.writer(text)
+
+        if rows.header:
+            writer.writerow(rows.header.values())
+        if rows.types is not None and self.types_location is ROW:
+            writer.writerow(rows.types.values())
+        for row in rows:
+            writer.writerow(row.values())
+
+        return text.getvalue()
