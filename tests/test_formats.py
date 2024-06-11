@@ -1,9 +1,26 @@
 from datetime import date, time, datetime
 from textwrap import dedent
+from typing import Iterable
 
-from testfixtures import compare
+from testfixtures import compare, ShouldRaise
 
-from chide.formats import PrettyFormat, HEADER, ROW
+from chide.formats import PrettyFormat, HEADER, ROW, CSVFormat, TabularFormat
+from chide.typing import Attrs
+
+
+class TestTabularFormat:
+
+    def test_text_to_tuples(self) -> None:
+
+        class NoTextToTuplesUse(TabularFormat):
+            def render(self, attrs: Iterable[Attrs]) -> str:
+                return str(attrs)
+
+        format_ = NoTextToTuplesUse()
+        compare(format_.render([{'x': 1}]), expected="[{'x': 1}]")
+
+        with ShouldRaise(NotImplementedError):
+            format_.text_to_tuples('')
 
 
 class TestPrettyFormat:
@@ -353,3 +370,109 @@ class TestPrettyFormat:
         parsed = pretty.parse(source)
         rendered = pretty.render(parsed)
         compare(expected=source, actual=rendered)
+
+
+class TestCSVFormat:
+
+    def test_parse_minimal(self) -> None:
+        format_ = CSVFormat()
+        actual = format_.parse("".join((
+            'x,y\n',
+            '1,foo\n'
+        )))
+        compare(actual, expected=[
+            {'x': 1, 'y': 'foo'},
+        ])
+
+    def test_render_minimal(self) -> None:
+        format_ = CSVFormat()
+        actual = format_.render([
+            {'x': 1, 'y': 'foo'},
+        ])
+        expected = "".join((
+            'x,y\r\n',
+            '1,foo\r\n'
+        ))
+        compare(expected=expected, actual=actual, show_whitespace=True)
+
+    def test_render_empty(self) -> None:
+        format_ = CSVFormat(types_location=ROW)
+        actual = format_.render([])
+        compare(
+            actual,
+            expected=dedent("")
+        )
+
+    def test_roundtrip_minimal(self) -> None:
+        source = "".join((
+            'x,y\r\n',
+            '1,foo\r\n'
+        ))
+        format_ = CSVFormat()
+        parsed = format_.parse(source)
+        compare(parsed, expected=[
+            {'x': 1, 'y': 'foo'},
+        ])
+        compare(expected=source, actual=format_.render(parsed), show_whitespace=True)
+
+    def test_roundtrip_whitespace_in_values(self) -> None:
+        source = "".join((
+            'x,y\r\n',
+            '1,foo\r\n',
+            "2,' bar'\r\n",
+            "3,'baz '\r\n",
+        ))
+        format_ = CSVFormat()
+        parsed = format_.parse(source)
+        compare(parsed, expected=[
+            {'x': 1, 'y': 'foo'},
+            {'x': 2, 'y': ' bar'},
+            {'x': 3, 'y': 'baz '},
+        ])
+        rendered = format_.render(parsed)
+        compare(expected=source, actual=rendered, show_whitespace=True)
+
+    def test_roundtrip_maximal_types_in_row(self) -> None:
+        source = "".join((
+            'start,time of day,end\r\n',
+            'date,,date\r\n',
+            '27 May 04,09:00,01 Jun 04\r\n'
+            '02 Jun 04,11:02,02 Jul 04\r\n'
+        ))
+        format_ = CSVFormat(
+            type_parse={'date': lambda text: datetime.strptime(text, '%d %b %y').date()},
+            column_parse={'time of day': lambda text: datetime.strptime(text, '%H:%M').time()},
+            type_render={date: lambda d: d.strftime('%d %b %y')},
+            type_names={date: 'date', time: None},
+            column_render={'time of day': lambda t: t.strftime('%H:%M')},
+            types_location=ROW,
+        )
+        parsed = format_.parse(source)
+        compare(parsed, expected=[
+            {'start': date(2004, 5, 27), 'time of day': time(9, 0), 'end': date(2004, 6, 1)},
+            {'start': date(2004, 6, 2), 'time of day': time(11, 2), 'end': date(2004, 7, 2)},
+        ])
+        rendered = format_.render(parsed)
+        compare(expected=source, actual=rendered, show_whitespace=True)
+
+    def test_roundtrip_maximal_types_in_header(self) -> None:
+        source = "".join((
+            'start (date),time of day,end (date)\r\n',
+            '27 May 04,09:00,01 Jun 04\r\n'
+            '02 Jun 04,11:02,02 Jul 04\r\n'
+        ))
+        format_ = CSVFormat(
+            type_parse={'date': lambda text: datetime.strptime(text, '%d %b %y').date()},
+            column_parse={'time of day': lambda text: datetime.strptime(text, '%H:%M').time()},
+            type_render={date: lambda d: d.strftime('%d %b %y')},
+            type_names={date: 'date', time: None},
+            column_render={'time of day': lambda t: t.strftime('%H:%M')},
+            types_location=HEADER,
+        )
+        parsed = format_.parse(source)
+        compare(parsed, expected=[
+            {'start': date(2004, 5, 27), 'time of day': time(9, 0), 'end': date(2004, 6, 1)},
+            {'start': date(2004, 6, 2), 'time of day': time(11, 2), 'end': date(2004, 7, 2)},
+        ])
+        rendered = format_.render(parsed)
+        compare(expected=source, actual=rendered, show_whitespace=True)
