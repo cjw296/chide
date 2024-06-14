@@ -37,21 +37,21 @@ class Collection:
 
     def attributes(self, type_: Type[T], **attrs: Any) -> Attrs:
         """
+        Make the attributes for a sample object of the specified ``type_``
+        using the default attributes for that type in this :class:`Collection`.
+
+        The ``attrs`` mapping will be overlayed onto the sample attributes
+        and returned as a :class:`dict`.
+        """
+        return self._attrs(type_, attrs, self.make)
+
+    def make(self, type_: Type[T], **attrs: Any) -> T:
+        """
         Make a sample object of the specified ``type_`` using the default
         attributes for that type in this :class:`Collection`.
 
         The ``attrs`` mapping will be overlaid onto the sample attributes
         before being used with ``type_`` to instantiate and return a new
         sample object.
-        """
-        return self._attrs(type_, attrs, self.make)
-
-    def make(self, type_: Type[T], **attrs: Any) -> T:
-        """
-        Make the attributes for a sample object of the specified ``type_``
-        using the default attributes for that type in this :class:`Collection`.
-
-        The ``attrs`` mapping will be overlayed onto the sample attributes
-        and returned as a :class:`dict`.
         """
         return type_(**self.attributes(type_, **attrs))
