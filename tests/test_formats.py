@@ -1,26 +1,9 @@
 from datetime import date, time, datetime
 from textwrap import dedent
-from typing import Iterable
 
-from testfixtures import compare, ShouldRaise
+from testfixtures import compare
 
-from chide.formats import PrettyFormat, HEADER, ROW, CSVFormat, TabularFormat
-from chide.typing import Attrs
-
-
-class TestTabularFormat:
-
-    def test_text_to_tuples(self) -> None:
-
-        class NoTextToTuplesUse(TabularFormat):
-            def render(self, attrs: Iterable[Attrs]) -> str:
-                return str(attrs)
-
-        format_ = NoTextToTuplesUse()
-        compare(format_.render([{'x': 1}]), expected="[{'x': 1}]")
-
-        with ShouldRaise(NotImplementedError):
-            format_.text_to_tuples('')
+from chide.formats import PrettyFormat, HEADER, ROW, CSVFormat
 
 
 class TestPrettyFormat:
@@ -74,7 +57,7 @@ class TestPrettyFormat:
             +-----+------+
             """
         )
-        compare(actual, strict=True, expected=[
+        compare(actual, expected=[
             {'x': 1.0, 'y': 'foo'},
             {'x': 2.0, 'y': 'bar'},
             {'x': 3.0, 'y': 'baz'},
@@ -93,7 +76,7 @@ class TestPrettyFormat:
             +-----------+-----------+
             """
         )
-        compare(actual, strict=True, expected=[
+        compare(actual, expected=[
             {'x': 1.0, 'y': 'foo'},
             {'x': 2.0, 'y': 'bar'},
             {'x': 3.0, 'y': 'baz'},
@@ -115,7 +98,7 @@ class TestPrettyFormat:
             +-+--------+
             """
         )
-        compare(actual, strict=True, expected=[
+        compare(actual, expected=[
             {'x': 1, 'y': b'foo'},
             {'x': 2, 'y': b'bar'},
             {'x': 3, 'y': b'baz'},
@@ -139,13 +122,13 @@ class TestPrettyFormat:
             +-----+------+
             """
         )
-        compare(actual, strict=True, expected=[
+        compare(actual, expected=[
             {'x': 1, 'y': b'foo'},
             {'x': 2, 'y': b'bar'},
             {'x': 3, 'y': b'baz'},
         ])
 
-    def test_simple_parse_literal_eval_falls_back_to_string(self) -> None:
+    def test_parse_literal_eval_falls_back_to_string(self) -> None:
         pretty = PrettyFormat()
         actual = pretty.parse(
             """
@@ -159,6 +142,24 @@ class TestPrettyFormat:
         compare(actual, expected=[
             {'x': '1 2'},
         ])
+
+    def test_parse_returns_column_widths(self) -> None:
+        pretty = PrettyFormat()
+        sample_lo_temp = 4
+        actual = pretty.parse(
+            f"""
+            +-------------+----------------+---------+
+            |city         |temp_lo         | temp_hi |
+            +-------------+----------------+---------+
+            |San Francisco|{sample_lo_temp}| 5       |
+            +-------------+----------------+---------+
+            """
+        )
+        compare(actual, expected=[
+            {'city': 'San Francisco', 'temp_lo': 4, 'temp_hi': 5},
+        ])
+        # temp_hi width has padding removed from 9, down to 7
+        compare(actual.widths, expected={'city': 13, 'temp_lo': 16, 'temp_hi': 7})
 
     def test_render_simple_single_row(self) -> None:
         pretty = PrettyFormat()
@@ -252,6 +253,35 @@ class TestPrettyFormat:
             """)
         )
 
+    def test_render_with_reference(self) -> None:
+        pretty = PrettyFormat()
+        ref = [{'z': 'X', 'y': 'XXXXX'}]
+        actual = pretty.render([{'x': 1, 'y': 'foo'}], ref)
+        compare(
+            actual,
+            expected=dedent("""\
+            +------+-------+---+
+            | z    | y     | x |
+            +------+-------+---+
+            | None | foo   | 1 |
+            +------+-------+---+
+            """)
+        )
+
+    def test_render_with_empty_reference(self) -> None:
+        pretty = PrettyFormat()
+        actual = pretty.render([{'x': 1, 'y': 'foo'}], ref=[])
+        compare(
+            actual,
+            expected=dedent("""\
+            +---+-----+
+            | x | y   |
+            +---+-----+
+            | 1 | foo |
+            +---+-----+
+            """)
+        )
+
     def test_round_trip_values_simple(self) -> None:
         expected = [
             {'x': 1, 'y': 'foo'},
@@ -259,7 +289,7 @@ class TestPrettyFormat:
         pretty = PrettyFormat()
         rendered = pretty.render(expected)
         actual = pretty.parse(rendered)
-        compare(expected=expected, actual=actual, strict=True)
+        compare(expected=expected, actual=actual)
 
     def test_round_trip_values_multiple_rows(self) -> None:
         expected = [
@@ -270,7 +300,7 @@ class TestPrettyFormat:
         pretty = PrettyFormat()
         rendered = pretty.render(expected)
         actual = pretty.parse(rendered)
-        compare(expected=expected, actual=actual, strict=True)
+        compare(expected=expected, actual=actual)
 
     def test_round_trip_text_explicit_types_row(self) -> None:
         source = dedent("""\
@@ -402,6 +432,25 @@ class TestCSVFormat:
             actual,
             expected=dedent("")
         )
+
+    def test_render_with_reference(self) -> None:
+        format_ = CSVFormat()
+        ref = [{'z': 0, 'y': 0, 'x': 0}]
+        actual = format_.render([{'x': 1, 'y': 'foo'}], ref)
+        expected = "".join((
+            'z,y,x\r\n',
+            'None,foo,1\r\n'
+        ))
+        compare(expected=expected, actual=actual, show_whitespace=True)
+
+    def test_render_with_empty_reference(self) -> None:
+        format_ = CSVFormat()
+        actual = format_.render([{'x': 1, 'y': 'foo'}], ref=[])
+        expected = "".join((
+            'x,y\r\n',
+            '1,foo\r\n'
+        ))
+        compare(expected=expected, actual=actual, show_whitespace=True)
 
     def test_roundtrip_minimal(self) -> None:
         source = "".join((
