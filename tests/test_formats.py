@@ -177,6 +177,38 @@ class TestPrettyFormat:
             """)
         )
 
+    def test_render_no_padding(self) -> None:
+        pretty = PrettyFormat(padding=0)
+        actual = pretty.render([
+            {'x': 1, 'y': 'foo'},
+        ])
+        compare(
+            actual,
+            expected=dedent("""\
+            +-+---+
+            |x|y  |
+            +-+---+
+            |1|foo|
+            +-+---+
+            """)
+        )
+
+    def test_render_moar_padding(self) -> None:
+        pretty = PrettyFormat(padding=3)
+        actual = pretty.render([
+            {'x': 1, 'y': 'foo'},
+        ])
+        compare(
+            actual,
+            expected=dedent("""\
+            +-------+---------+
+            |   x   |   y     |
+            +-------+---------+
+            |   1   |   foo   |
+            +-------+---------+
+            """)
+        )
+
     def test_render_simple_multiple_rows(self) -> None:
         pretty = PrettyFormat()
         actual = pretty.render([
@@ -265,6 +297,27 @@ class TestPrettyFormat:
             +------+-------+---+
             | None | foo   | 1 |
             +------+-------+---+
+            """)
+        )
+
+    def test_render_with_reference_and_padding(self) -> None:
+        pretty = PrettyFormat(padding=3)
+        ref = pretty.parse(dedent("""\
+            +-------+---------+
+            |   z   |   y     |
+            +-------+---------+
+            |   X   |   XXX   |
+            +-------+---------+
+            """))
+        actual = pretty.render([{'y': 'foo'}], ref)
+        compare(
+            actual,
+            expected=dedent("""\
+            +----------+---------+
+            |   z      |   y     |
+            +----------+---------+
+            |   None   |   foo   |
+            +----------+---------+
             """)
         )
 

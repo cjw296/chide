@@ -194,10 +194,13 @@ class RenderedRows(list[dict[str, str]]):
 
 class PrettyLexer:
 
-    def __init__(self):
+    def __init__(self, padding: int):
         self.widths: list[int] = []
+        self.padding = padding
 
     def __call__(self, text: str) -> Iterable[list[str]]:
+        padding_text = ' ' * self.padding
+        padding_size = self.padding * 2
         for line in dedent(text).splitlines():
             line = line.strip()
             if not line or line.startswith('+'):
@@ -206,8 +209,12 @@ class PrettyLexer:
             widths = []
             for part in parts:
                 width = len(part)
-                if width >= 2 and part[0] == ' 'and  part[-1] == ' ':
-                    width -= 2
+                if (
+                        width >= padding_size and
+                        part[:self.padding] == padding_text and
+                        part[-self.padding:] == padding_text
+                ):
+                    width -= padding_size
                 widths.append(width)
             if self.widths:
                 self.widths = [max(w, w_) for w, w_ in zip_longest(self.widths, widths)]
@@ -227,10 +234,11 @@ class PrettyParsed(list[Attrs]):
 
 class PrettyRenderedRows(list[str]):
 
-    def __init__(self, widths: Widths) -> None:
+    def __init__(self, widths: Widths, padding: int) -> None:
         super().__init__()
-        self.divider = ''.join('+'+'-'*(widths[column]+2) for column in widths)+'+\n'
-        self.templates = {c: f'| {{:{w}}} ' for c, w in widths.items()}
+        self.divider = ''.join('+'+'-'*(widths[column]+padding*2) for column in widths)+'+\n'
+        pad = padding*' '
+        self.templates = {c: f'|{pad}{{:{w}}}{pad}' for c, w in widths.items()}
         self.widths = widths
 
     def add_divider(self) -> None:
@@ -257,6 +265,7 @@ class PrettyFormat(TabularFormat):
             column_render: ColumnRenderMapping | None = None,
             types_location: TypeLocation | None = None,
             minimum_column_widths: dict[str, int] | None = None,
+            padding: int = 1,
     ) -> None:
         super().__init__(
             type_parse,
@@ -269,9 +278,10 @@ class PrettyFormat(TabularFormat):
             types_location,
         )
         self.minimum_column_widths: dict[str, int] = minimum_column_widths or {}
+        self.padding = padding
 
     def parse(self, text: str) -> PrettyParsed:
-        lexer = PrettyLexer()
+        lexer = PrettyLexer(self.padding)
         rows = self._parse(text, lexer)
         return PrettyParsed(rows, lexer.widths)
 
@@ -292,7 +302,7 @@ class PrettyFormat(TabularFormat):
         rows = RenderedRows(attrs, self, columns)
         rows.update(widths, self.types_location)
 
-        rendered = PrettyRenderedRows(widths)
+        rendered = PrettyRenderedRows(widths, self.padding)
         rendered.add_divider()
         if rows.header:
             rendered.add_row(rows.header)
