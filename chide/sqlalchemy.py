@@ -1,7 +1,9 @@
 from typing import Any, Type
 
-from sqlalchemy import inspect
+from sqlalchemy import inspect, Row
+from sqlalchemy.orm import DeclarativeBase
 
+from .simplifiers import Simplifier, T, ObjectSimplifier
 from .set import Set as BaseSet
 from .typing import Attrs
 
@@ -31,3 +33,20 @@ class Set(BaseSet):
                 return None
             key.append(value)
         return tuple(key)
+
+
+class RowSimplifier(Simplifier[Row[Any]]):
+
+    def one(self, row: Row[Any]) -> Attrs:
+        return row._asdict()
+
+
+class MappedSimplifier(Simplifier[DeclarativeBase]):
+
+    def __init__(self) -> None:
+        self._obj_simplifier = ObjectSimplifier()
+
+    def one(self, obj: DeclarativeBase) -> Attrs:
+        attrs = self._obj_simplifier.one(obj)
+        attrs.pop('_sa_instance_state')
+        return attrs
