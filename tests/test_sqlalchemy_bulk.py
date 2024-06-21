@@ -39,7 +39,7 @@ def table_insert(engine: Engine, type_: Type[Base], text: str) -> None:
         session.add_all(type_(**attrs) for attrs in pretty.parse(text))
 
 
-def table_check(engine: Engine, type_: Type[Base], text: str) -> None:
+def table_check_rows(engine: Engine, type_: Type[Base], text: str) -> None:
     pretty = PrettyFormat(
         column_parse={'date': lambda text_: datetime.strptime(text_, '%Y-%m-%d').date()},
         column_render={'date': lambda d: d.strftime('%Y-%m-%d')},
@@ -52,6 +52,22 @@ def table_check(engine: Engine, type_: Type[Base], text: str) -> None:
             actual=actual,
             expected=expected,
             suffix='\nShould be:\n'+pretty.render(actual, ref=expected)
+        )
+
+
+def table_check_diff(engine: Engine, type_: Type[Base], text: str) -> None:
+    pretty = PrettyFormat(
+        column_parse={'date': lambda text_: datetime.strptime(text_, '%Y-%m-%d').date()},
+        column_render={'date': lambda d: d.strftime('%Y-%m-%d')},
+        padding=0,
+    )
+    with Session(engine) as session, session.begin():
+        expected = pretty.parse(text)
+        actual = MappedSimplifier().many(session.query(type_).all())
+        actual_text = pretty.render(actual, ref=expected)
+        compare(
+            actual=actual_text,
+            expected=pretty.render(expected, ref=pretty.parse(actual_text)),
         )
 
 
@@ -87,7 +103,7 @@ def test_render_pass(engine: Engine) -> None:
             Weather(city='San Francisco', temp_lo=43, temp_hi=57, prcp=0, date=date(1994, 11, 29)),
             Weather(city='Hayward', temp_lo=37, temp_hi=54, prcp=None, date=date(1994, 11, 29)),
         ))
-    table_check(
+    table_check_rows(
         engine,
         Weather,
         """
@@ -172,7 +188,7 @@ def test_render_fail(engine: Engine) -> None:
             +-------------+----------------+-------+----+----------+
             """)
     ):
-        table_check(
+        table_check_rows(
             engine,
             Weather,
             f"""
@@ -183,5 +199,36 @@ def test_render_fail(engine: Engine) -> None:
             |San Francisco|43              |57     |0   |1994-11-29|
             |Hayward      |37              |54     |None|1994-11-29|
             +-------------+----------------+-------+----+----------+
+            """
+        )
+
+
+def test_render_fail_unified_diff(engine: Engine) -> None:
+    with Session(engine) as session, session.begin():
+        session.add_all((
+            Weather(city='wide in db', temp_lo=1, temp_hi=5, prcp=0.25, date=date(1994, 11, 27)),
+        ))
+    with ShouldAssert(
+            dedent("""
+                --- expected
+                +++ actual
+                @@ -1,6 +1,6 @@
+                 +----------+---------+-------+----+----------+
+                 |city      |temp_lo  |temp_hi|prcp|date      |
+                 +----------+---------+-------+----+----------+
+                -|narrow    |111111122|5      |0.25|1994-11-27|
+                +|wide in db|1        |5      |0.25|1994-11-27|
+                 +----------+---------+-------+----+----------+
+                """)+' ',
+    ):
+        table_check_diff(
+            engine,
+            Weather,
+            f"""
+            +----------------+-------+----+----------+
+            |city  |temp_lo  |temp_hi|prcp|date      |
+            +------+---------+-------+----+----------+
+            |narrow|111111122|5      |0.25|1994-11-27|
+            +------+---------+-------+----+----------+
             """
         )
