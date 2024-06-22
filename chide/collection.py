@@ -1,6 +1,7 @@
 from typing import Type, Any, TypeVar, Callable
 
 from .factory import Factory
+from .simplifiers import ObjectSimplifier, Simplifier
 from .typing import Attrs
 
 T = TypeVar('T')
@@ -16,8 +17,8 @@ class Collection:
 
     """
 
-    def __init__(self, mapping: dict[Type[Any], Attrs]) -> None:
-        self.mapping = mapping
+    def __init__(self, mapping: dict[Type[Any], Attrs] | None = None) -> None:
+        self.mapping = mapping or {}
 
     def _attrs(
             self,
@@ -35,6 +36,9 @@ class Collection:
                 computed_attrs[key] = nest(value)
         computed_attrs.update(attrs)
         return computed_attrs
+
+    def add(self, obj: T, simplifier: Simplifier[T] = ObjectSimplifier()) -> None:
+        self.mapping[type(obj)] = simplifier.one(obj)
 
     def attributes(self, type_: Type[T], **attrs: Any) -> Attrs:
         """

@@ -1,9 +1,11 @@
+from dataclasses import dataclass
 from typing import Type
 
 from testfixtures import compare, ShouldRaise
 from unittest import TestCase
 
 from chide import Collection, Set
+from chide.simplifiers import Simplifier
 from chide.typing import Attrs
 from .helpers import Comparable
 
@@ -100,3 +102,31 @@ class TestCollection(TestCase):
         made = collection.make(dict)
         compare(made, expected={'y': []})
         assert made['y'] is unhashable
+
+    def test_add_sample(self) -> None:
+
+        @dataclass
+        class Sample:
+            x: int
+            y: int
+
+        sample = Sample(x=1, y=2)
+        collection = Collection()
+        collection.add(sample)
+
+        compare(collection.attributes(Sample), expected={'x': 1, 'y': 2})
+        assert collection.make(Sample) is not sample
+
+    def test_with_explicit_simplifier(self) -> None:
+
+        class Sample:
+            pass
+
+        class SampleSimplifier(Simplifier[Sample]):
+            def one(self, obj: Sample) -> Attrs:
+                return {'made': 'up'}
+
+        collection = Collection()
+        collection.add(Sample(), SampleSimplifier())
+
+        compare(collection.attributes(Sample), expected={'made': 'up'})
