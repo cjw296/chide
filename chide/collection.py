@@ -1,5 +1,6 @@
 from typing import Type, Any, TypeVar, Callable
 
+from .factory import Factory
 from .typing import Attrs
 
 T = TypeVar('T')
@@ -55,3 +56,6 @@ class Collection:
         sample object.
         """
         return type_(**self.attributes(type_, **attrs))
+
+    def bind(self, type_: Type[T], **attrs: Any) -> Factory[T]:
+        return Factory[T](self, type_, attrs)
