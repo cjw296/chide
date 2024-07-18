@@ -38,6 +38,16 @@ class Collection:
         return computed_attrs
 
     def add(self, obj: T, simplifier: Simplifier[T] = ObjectSimplifier()) -> None:
+        """
+        Add the attributes from the supplied object to this collection and
+        use them when samples of the type of that object are required.
+
+        :param obj: The sample object from which to extract attributes.
+
+        :param simplifier:
+          The :class:`~chide.simplifiers.Simplifier` to use to extract attributes
+          from ``obj``.
+        """
         self.mapping[type(obj)] = simplifier.one(obj)
 
     def attributes(self, type_: Type[T], **attrs: Any) -> Attrs:
@@ -45,7 +55,7 @@ class Collection:
         Make the attributes for a sample object of the specified ``type_``
         using the default attributes for that type in this :class:`Collection`.
 
-        The ``attrs`` mapping will be overlayed onto the sample attributes
+        The ``attrs`` mapping will be overlaid onto the sample attributes
         and returned as a :class:`dict`.
         """
         return self._attrs(type_, attrs, self.make)
@@ -62,4 +72,9 @@ class Collection:
         return type_(**self.attributes(type_, **attrs))
 
     def bind(self, type_: Type[T], **attrs: Any) -> Factory[T]:
+        """
+        Bind the supplied attributes into a :class:`~chide.factory.Factory` for the
+        requested ``type_`` by overlaying them onto the sample attributes
+        for that ``type_`` in this :class:`Collection`.
+        """
         return Factory[T](self, type_, attrs)
