@@ -27,7 +27,7 @@ _MARKER = object()
 
 class ObjectSimplifier(Simplifier[object]):
     """
-    A simplifier that can that can extract attributes from :class:`object`-based
+    A simplifier that can extract attributes from :class:`object`-based
     classes that have either a ``__dict__`` or ``__slots__``.
     """
 
