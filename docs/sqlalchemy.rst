@@ -123,10 +123,98 @@ as we need them:
 Row Simplifier
 --------------
 
+For a table such as this:
 
+.. code-block:: python
+
+    from sqlalchemy import MetaData, Table, Column, Integer, String
+    
+    metadata = MetaData()
+    
+    user_table = Table(
+        "user_account",
+        metadata,
+        Column("id", Integer, primary_key=True),
+        Column("name", String(30)),
+        Column("fullname", String),
+    )
+   
+.. invisible-code-block: python
+
+    from sqlalchemy import insert, select
+
+    engine = create_engine("sqlite+pysqlite:///:memory:")
+    metadata.create_all(engine)
+    with engine.connect() as conn:
+        result = conn.execute(
+            insert(user_table),
+            [
+                {"name": "sandy", "fullname": "Sandy Cheeks"},
+                {"name": "patrick", "fullname": "Patrick Star"},
+            ],
+        )
+        conn.commit()
+
+A :doc:`simplifier <simplifiers>` is included for the :class:`rows <sqlalchemy.engine.Row>` returned
+by a query such as this:
+
+.. code-block:: python
+
+  with engine.connect() as conn:
+      rows = conn.execute(select(user_table))
+      
+It is used as follows:
+
+>>> from chide.sqlalchemy import RowSimplifier
+>>> for attrs in RowSimplifier().many(rows):
+...     print(attrs)
+{'id': 1, 'name': 'sandy', 'fullname': 'Sandy Cheeks'}
+{'id': 2, 'name': 'patrick', 'fullname': 'Patrick Star'}
 
 .. _sqlalchemy-mapped-simplifier:
 
 ORM-Mapped Object Simplifier
 ----------------------------
 
+For an ORM-mapped objects such as this:
+
+.. code-block:: python
+
+    from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+    
+    class Base(DeclarativeBase):
+        pass
+        
+    class User(Base):
+        __tablename__ = "user_account"
+        id: Mapped[int] = mapped_column(primary_key=True)
+        name: Mapped[str]
+        fullname: Mapped[str | None]
+   
+.. invisible-code-block: python
+
+    from sqlalchemy.orm import Session
+
+    engine = create_engine("sqlite+pysqlite:///:memory:")
+    Base.metadata.create_all(engine)
+    with Session(engine) as session, session.begin():
+        session.add_all((
+            User(name="squidward", fullname="Squidward Tentacles"),
+            User(name="ehkrabs", fullname="Eugene H. Krabs")
+        ))
+
+A :doc:`simplifier <simplifiers>` is included that can be used to simplify the results of a query 
+such as this:
+
+.. code-block:: python
+
+  with Session(engine) as session:
+      objects = session.query(User)
+      
+It is used as follows:
+
+>>> from chide.sqlalchemy import MappedSimplifier
+>>> for attrs in MappedSimplifier().many(objects):
+...     print(attrs)
+{'id': 1, 'name': 'squidward', 'fullname': 'Squidward Tentacles'}
+{'id': 2, 'name': 'ehkrabs', 'fullname': 'Eugene H. Krabs'}
