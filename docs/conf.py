@@ -13,6 +13,7 @@ extensions = [
 intersphinx_mapping = {
     'python': ('http://docs.python.org', None),
     'sqlalchemy': ('https://docs.sqlalchemy.org/en/20/', None),
+    'testfixtures': ('https://testfixtures.readthedocs.io/en/latest/', None),
 }
 
 
