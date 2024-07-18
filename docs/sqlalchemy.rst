@@ -1,5 +1,16 @@
-Use with SQLAlchemy
-===================
+SQLAlchemy
+==========
+
+One common use of :mod:`chide` is for creating sample objects and making assertions about
+database table contents when using `SQLAlchemy`__. As a result, there are specialised
+implementations included to make life easier that are described below.
+
+__ https://www.sqlalchemy.org/
+
+.. _sqlalchemy-set:
+
+Sets
+----
 
 :mod:`chide` has a special :class:`~chide.Set` subclass that helps to make sure
 only one sample object is created with a particular primary key in any
@@ -9,8 +20,7 @@ one table.
 
     from sqlalchemy import Column, String, create_engine, ForeignKey
     from sqlalchemy import Integer
-    from sqlalchemy.ext.declarative import declarative_base
-    from sqlalchemy.orm import sessionmaker, relationship
+    from sqlalchemy.orm import sessionmaker, relationship, declarative_base
     engine = create_engine('sqlite:///:memory:')
     Session = sessionmaker(bind=engine)
     Base = declarative_base()
@@ -107,3 +117,16 @@ as we need them:
 >>> parent4 = session.query(Parent).filter_by(id=4).one()
 >>> parent4.child.value
 7
+
+.. _sqlalchemy-row-simplifier:
+
+Row Simplifier
+--------------
+
+
+
+.. _sqlalchemy-mapped-simplifier:
+
+ORM-Mapped Object Simplifier
+----------------------------
+

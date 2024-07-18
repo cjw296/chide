@@ -24,6 +24,7 @@ copyright = '2016 - %s Chris Withers' % build_date.year
 version = release = metadata.version(project)
 exclude_trees = ['_build']
 pygments_style = 'sphinx'
+autodoc_member_order = 'bysource'
 
 # Options for HTML output
 html_theme = 'furo'
@@ -39,6 +40,10 @@ nitpicky = True
 nitpick_ignore = [
     ('py:class', 'Address'),  # documentation example
     ('py:class', 'chide.collection.T'),  # type var
+    ('py:class', 'chide.factory.T'),  # type var
+    ('py:obj', 'chide.factory.T'),  # type var
     ('py:class', 'chide.set.T'),  # type var
+    ('py:class', 'chide.simplifiers.T'),  # type var
+    ('py:obj', 'chide.simplifiers.T'),  # type var
     ('py:func', 'identify'),  # documentation example
 ]
