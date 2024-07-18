@@ -26,7 +26,7 @@ class ObjectSimplifier(Simplifier[object]):
             class_slots = getattr(class_, '__slots__', None)
             if class_slots is not None:
                 slots.update(class_slots)
-        for attr in slots:
+        for attr in sorted(slots):
             value = getattr(obj, attr, _MARKER)
             if value is not _MARKER:
                 attrs[attr] = value
