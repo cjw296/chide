@@ -47,6 +47,5 @@ class MappedSimplifier(Simplifier[DeclarativeBase]):
         self._obj_simplifier = ObjectSimplifier()
 
     def one(self, obj: DeclarativeBase) -> Attrs:
-        attrs = self._obj_simplifier.one(obj)
-        attrs.pop('_sa_instance_state')
-        return attrs
+        state = inspect(obj)
+        return {a.key: a.value for a in state.attrs}
