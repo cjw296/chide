@@ -1,12 +1,9 @@
-from typing import Any, TypeVar, Type, Callable, TypeAlias, Hashable
+from typing import Any, TypeVar, Type, Hashable
 
 from chide import Collection
-from .typing import Attrs
+from .typing import Identifier
 
 T = TypeVar('T')
-
-
-Identifier: TypeAlias = Callable[[Type[Any], Attrs], Hashable | None]
 
 
 class Set:
@@ -19,7 +16,8 @@ class Set:
         when necessary.
 
     :param identify:
-        A callable that takes `type_` and `attrs` parameters.
+        An :class:`~chide.typing.Identifier` callable that takes
+        `type_` and `attrs` parameters.
 
         `type_`, usually a class, is the type of the
         sample object being requested.

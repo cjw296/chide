@@ -1,3 +1,6 @@
+Chide
+=====
+
 |CircleCI|_ |Docs|_
 
 .. |CircleCI| image:: https://circleci.com/gh/cjw296/chide/tree/master.svg?style=shield
@@ -6,33 +9,33 @@
 .. |Docs| image:: https://readthedocs.org/projects/chide/badge/?version=latest
 .. _Docs: http://chide.readthedocs.org/en/latest/
 
-chide
-=====
+Quickly create and compare sample objects.
 
-Quickly create sample objects from data.
+Chide's philosophy is to give you a simple registry of parameters
+needed to instantiate objects for your tests.
+There's also support for simplifying objects down to mappings of their attributes
+for easier comparison and rendering, along with parsing and rendering of formats
+for inserting or asserting about multiple objects that are naturally tabular.
 
-Chide's philosophy is to give you a super simple registry of parameters
-that are needed to instantiate objects needed in your tests. You'll
-hopefully only need this when you have objects that are onerous to set up
-as a result of having lots of required parameters needed to create
-a whole tree of objects for each test.
-
-Here's a tiny example...
+Quickstart
+~~~~~~~~~~
 
 Say we have two classes that each require two parameters in order to
 be instantiated:
 
 .. code-block:: python
 
-  class ClassOne(object):
+  from dataclasses import dataclass
 
-    def __init__(self, x, y):
-        self.x, self.y = x, y
+  @dataclass
+  class ClassOne:
+    x: int
+    y: int
 
-  class ClassTwo(object):
-
-    def __init__(self, a, b):
-        self.a, self.b = a, b
+  @dataclass
+  class ClassTwo:
+    a: int
+    b: ClassOne
 
 We can set up a registry of sample values as follows:
 
@@ -48,22 +51,14 @@ We can set up a registry of sample values as follows:
 Now we can quickly make sample objects:
 
 >>> samples.make(ClassOne)
-<ClassOne ...>
->>> _.x, _.y
-(1, 2)
+ClassOne(x=1, y=2)
 
 We can provide our own overrides if we want:
 
 >>> samples.make(ClassOne, y=3)
-<ClassOne ...>
->>> _.x, _.y
-(1, 3)
+ClassOne(x=1, y=3)
 
 We can also create nested trees of objects:
 
 >>> samples.make(ClassTwo)
-<ClassTwo ...>
->>> _.b
-<ClassOne ...>
-
-Why chide? Well, it's hardly mocking...
+ClassTwo(a=1, b=ClassOne(x=1, y=2))

@@ -36,12 +36,18 @@ class Set(BaseSet):
 
 
 class RowSimplifier(Simplifier[Row[Any]]):
+    """
+    A simplifier for SQLAlchemy :class:`~sqlalchemy.engine.Row` objects.
+    """
 
     def one(self, row: Row[Any]) -> Attrs:
         return row._asdict()
 
 
 class MappedSimplifier(Simplifier[DeclarativeBase]):
+    """
+    A simplifier for SQLAlchemy ORM-mapped objects.
+    """
 
     def __init__(self) -> None:
         self._obj_simplifier = ObjectSimplifier()
