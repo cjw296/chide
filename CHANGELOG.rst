@@ -1,10 +1,29 @@
 Changes
 =======
 
+.. currentmodule:: chide
+
+3.0.0 (19 Jul 2024)
+-------------------
+
+- Python 3.11 is now the minimum supported version.
+
+- Now strictly typed.
+
+- Addition of :meth:`Collection.bind` and :class:`~factory.Factory` to support partial building of 
+  sample objects.
+
+- Addition of :doc:`formats <formats>`, :doc:`simplifiers <simplifiers>` and their 
+  :doc:`patterns of use <patterns>`. 
+
+- Development process refresh.
+
+- Documentation refresh.
+
 2.1.2 (31 Jan 2019)
 -------------------
 
-- Fix bug in :class:`~chide.Collection` occurring when sample attributes were
+- Fix bug in :class:`Collection` occurring when sample attributes were
   not hashable.
 
 2.1.1 (9 Jan 2019)
