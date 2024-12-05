@@ -3,6 +3,11 @@ Changes
 
 .. currentmodule:: chide
 
+3.0.1 (5 Dec 2024)
+------------------
+
+- Fix location of `py.typed` so it is included in distributions.
+
 3.0.0 (19 Jul 2024)
 -------------------
 
