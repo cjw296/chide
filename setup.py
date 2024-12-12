@@ -40,8 +40,7 @@ setup(
             'furo',
             'sphinx',
         ] + optionals,
-        build=[
-            'setuptools-git',
+        release=[
             'twine',
             'wheel'
         ]
