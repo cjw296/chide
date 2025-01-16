@@ -32,6 +32,9 @@ class ObjectSimplifier(Simplifier[object]):
     """
 
     def one(self, obj: object) -> Attrs:
+        if isinstance(obj, dict):
+            return dict(obj)
+
         attrs = {}
         slots = set()
         for class_ in type(obj).__mro__:

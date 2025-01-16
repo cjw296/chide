@@ -84,3 +84,14 @@ class TestObjectSimplifier:
         compare(
             simplifier.many([obj1, obj2]), expected=[{'x': None}, {}],
         )
+
+    def test_dict(self) -> None:
+        simplifier = ObjectSimplifier()
+        compare(simplifier.one({'x': 1}), expected={'x': 1}, strict=True)
+
+    def test_dict_subclass(self) -> None:
+        simplifier = ObjectSimplifier()
+
+        class MyDict(dict): pass
+
+        compare(simplifier.one(MyDict(x=1)), expected={'x': 1}, strict=True)
