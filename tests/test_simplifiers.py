@@ -95,3 +95,13 @@ class TestObjectSimplifier:
         class MyDict(dict): pass
 
         compare(simplifier.one(MyDict(x=1)), expected={'x': 1}, strict=True)
+
+    def test_int(self) -> None:
+        simplifier = ObjectSimplifier()
+        with ShouldRaise(TypeError("Can't simplify <class 'int'> 1")):
+            simplifier.one(1)
+
+    def test_list(self) -> None:
+        simplifier = ObjectSimplifier()
+        with ShouldRaise(TypeError("Can't simplify <class 'list'> [1]")):
+            simplifier.one([1])

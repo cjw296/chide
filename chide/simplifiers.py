@@ -49,4 +49,8 @@ class ObjectSimplifier(Simplifier[object]):
             attrs.update(vars(obj))
         except TypeError:
             pass
+
+        if not (attrs or slots):
+            raise TypeError(f"Can't simplify {type(obj)} {obj!r}")
+
         return attrs
