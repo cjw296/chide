@@ -37,7 +37,12 @@ class Collection:
         computed_attrs.update(attrs)
         return computed_attrs
 
-    def add(self, obj: T, simplifier: Simplifier[T] = ObjectSimplifier()) -> None:
+    def add(
+            self,
+            obj: T,
+            simplifier: Simplifier[T]  = ObjectSimplifier(),
+            annotated: Type[T] | None = None,
+    ) -> None:
         """
         Add the attributes from the supplied object to this collection and
         use them when samples of the type of that object are required.
@@ -47,8 +52,13 @@ class Collection:
         :param simplifier:
           The :class:`~chide.simplifiers.Simplifier` to use to extract attributes
           from ``obj``.
+
+        :param annotated:
+          If ``obj`` is an instance of a simple type such as a :class:`dict`,
+          it may be necessary to provided the annotated type for data instance
+          such that it can be correctly added to the collection with that type.
         """
-        self.mapping[type(obj)] = simplifier.one(obj)
+        self.mapping[annotated or type(obj)] = simplifier.one(obj)
 
     def attributes(self, type_: Type[T], **attrs: Any) -> Attrs:
         """

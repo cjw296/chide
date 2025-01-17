@@ -342,3 +342,51 @@ Since the test fails, we get the following extensive :class:`AssertionError`::
 
     with ShouldAssert(expected_assertion):
         test_your_code(DatabaseHelper())
+
+
+Make different sample objects of the same type
+----------------------------------------------
+
+Some sample objects are not differentiated by type but by their attributes.
+For example, when generating sample JSON data from simple data types, you may
+have people:
+
+.. code-block:: python
+
+  person = {'name': 'John Doe'}
+
+You may also have addresses:
+
+.. code-block:: python
+
+  address = {'value': 'Somewhere in the clouds'}
+
+In order to store these in a :class:`Collection`, annotated types can be used:
+
+.. code-block:: python
+
+    from typing import Annotated
+    from chide import Collection
+
+    Person = Annotated[dict[str, str], 'Person']
+    Address = Annotated[dict[str, str], 'Address']
+
+    samples = Collection({Person: {'name': 'John Doe', 'address': Address}})
+
+To add this kind of sample to an existing collection, the type must be supplied:
+
+.. code-block:: python
+
+    samples.add({'value': 'Somewhere in the clouds'}, annotated=Address)
+
+Samples of these types can now be created as normal:
+
+>>> samples.make(Person)
+{'name': 'John Doe', 'address': {'value': 'Somewhere in the clouds'}}
+
+Note that no sample is available for the un-annotated type:
+
+>>> samples.make(dict)
+Traceback (most recent call last):
+...
+KeyError: <class 'dict'>

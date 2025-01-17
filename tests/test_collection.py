@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Type
+from typing import Type, Annotated
 
 from testfixtures import compare, ShouldRaise
 from unittest import TestCase
@@ -8,6 +8,7 @@ from chide import Collection, Set
 from chide.simplifiers import Simplifier
 from chide.typing import Attrs
 from .helpers import Comparable
+from .test_helpers import Sample
 
 
 class TypeA(Comparable, object):
@@ -130,3 +131,32 @@ class TestCollection(TestCase):
         collection.add(Sample(), SampleSimplifier())
 
         compare(collection.attributes(Sample), expected={'made': 'up'})
+
+    def test_annotated_data_to_constructor(self) -> None:
+
+        SampleFooData = Annotated[dict, 'foo']
+        SampleBarData = Annotated[dict, 'bar']
+
+        collection = Collection({
+            dict: {'type': 'dict'},
+            SampleFooData: {'type': 'foo'},
+            SampleBarData: {'type': 'bar'},
+        })
+
+        compare(collection.make(dict), strict=True, expected={'type': 'dict'})
+        compare(collection.make(SampleFooData), strict=True, expected={'type': 'foo'})
+        compare(collection.make(SampleBarData), strict=True, expected={'type': 'bar'})
+
+    def test_annotated_data_to_add(self) -> None:
+
+        SampleFooData = Annotated[dict, 'foo']
+        SampleBarData = Annotated[dict, 'bar']
+
+        collection = Collection()
+        collection.add({'type': 'dict'})
+        collection.add({'type': 'foo'}, annotated=SampleFooData)
+        collection.add({'type': 'bar'}, annotated=SampleBarData)
+
+        compare(collection.make(dict), strict=True, expected={'type': 'dict'})
+        compare(collection.make(SampleFooData), strict=True, expected={'type': 'foo'})
+        compare(collection.make(SampleBarData), strict=True, expected={'type': 'bar'})
