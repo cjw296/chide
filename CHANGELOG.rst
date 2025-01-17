@@ -3,10 +3,15 @@ Changes
 
 .. currentmodule:: chide
 
+3.1.0 (17 Jan 2024)
+-------------------
+
+- Add support for different samples of the same type using :any:`typing.Annotated`.
+
 3.0.1 (5 Dec 2024)
 ------------------
 
-- Fix location of `py.typed` so it is included in distributions.
+- Fix location of ``py.typed`` so it is included in distributions.
 
 3.0.0 (19 Jul 2024)
 -------------------

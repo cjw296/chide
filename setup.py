@@ -11,7 +11,7 @@ optionals = ['sqlalchemy']
 
 setup(
     name='chide',
-    version='3.0.1',
+    version='3.1.0',
     author='Chris Withers',
     author_email='chris@withers.org',
     license='MIT',
