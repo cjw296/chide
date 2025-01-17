@@ -4,7 +4,7 @@ Chide
 |CircleCI|_ |Docs|_
 
 .. |CircleCI| image:: https://circleci.com/gh/cjw296/chide/tree/master.svg?style=shield
-.. _CircleCI: https://circleci.com/gh/cjw296/tree/chide
+.. _CircleCI: https://app.circleci.com/pipelines/github/cjw296/chide
 
 .. |Docs| image:: https://readthedocs.org/projects/chide/badge/?version=latest
 .. _Docs: http://chide.readthedocs.org/en/latest/
