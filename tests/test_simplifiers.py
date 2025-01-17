@@ -92,7 +92,7 @@ class TestObjectSimplifier:
     def test_dict_subclass(self) -> None:
         simplifier = ObjectSimplifier()
 
-        class MyDict(dict): pass
+        class MyDict(dict[str, int]): pass
 
         compare(simplifier.one(MyDict(x=1)), expected={'x': 1}, strict=True)
 
