@@ -1,13 +1,20 @@
 Chide
 =====
 
-|CircleCI|_ |Docs|_
 
-.. |CircleCI| image:: https://circleci.com/gh/cjw296/chide/tree/master.svg?style=shield
-.. _CircleCI: https://app.circleci.com/pipelines/github/cjw296/chide
+|Docs|_ |PyPI|_  |Git|_ |CircleCI|_
 
 .. |Docs| image:: https://readthedocs.org/projects/chide/badge/?version=latest
 .. _Docs: http://chide.readthedocs.org/en/latest/
+
+.. |PyPI| image:: https://badge.fury.io/py/chide.svg
+.. _PyPI: https://pypi.org/project/chide/
+
+.. |Git| image:: https://badge.fury.io/gh/cjw296%2Fchide.svg
+.. _Git: https://github.com/cjw296/chide
+
+.. |CircleCI| image:: https://circleci.com/gh/cjw296/chide/tree/master.svg?style=shield
+.. _CircleCI: https://circleci.com/gh/cjw296/testfixtures/tree/master
 
 Quickly create and compare sample objects.
 
