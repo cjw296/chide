@@ -14,7 +14,7 @@ Chide
 .. _Git: https://github.com/cjw296/chide
 
 .. |CircleCI| image:: https://circleci.com/gh/cjw296/chide/tree/master.svg?style=shield
-.. _CircleCI: https://circleci.com/gh/cjw296/testfixtures/tree/master
+.. _CircleCI: https://circleci.com/gh/cjw296/chide/tree/master
 
 Quickly create and compare sample objects.
 
