@@ -3,6 +3,11 @@ Changes
 
 .. currentmodule:: chide
 
+3.2.0 (11 Feb 2026)
+-------------------
+
+- Add support for generic types.
+
 3.1.0 (17 Jan 2024)
 -------------------
 
