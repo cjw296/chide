@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Type, Annotated
+from typing import Type, Annotated, TypeVar, Generic
 
 from testfixtures import compare, ShouldRaise
 from unittest import TestCase
@@ -160,3 +160,31 @@ class TestCollection(TestCase):
         compare(collection.make(dict), strict=True, expected={'type': 'dict'})
         compare(collection.make(SampleFooData), strict=True, expected={'type': 'foo'})
         compare(collection.make(SampleBarData), strict=True, expected={'type': 'bar'})
+
+    def test_parameterized_type_mapping(self) -> None:
+        T = TypeVar('T')
+
+        @dataclass
+        class Sample(Generic[T]):
+            a: T
+            b: float
+
+        collection = Collection({Sample[str]: {'a': 'foo'}, Sample[int]: {'a': 1}})
+
+        compare(collection.make(Sample[str], b=2.0), strict=True, expected=Sample[str]('foo',2.0))
+        compare(collection.make(Sample[int], b=3.0), strict=True, expected=Sample[int](1, 3.0))
+
+    def test_parameterized_type_add(self) -> None:
+        T = TypeVar('T')
+
+        @dataclass
+        class Sample(Generic[T]):
+            a: T
+
+        collection = Collection()
+        collection.add(Sample[str]('foo'))
+        collection.add(Sample[int](1))
+
+        compare(collection.make(Sample[str]), strict=True, expected=Sample[str]('foo'))
+        compare(collection.make(Sample[int]), strict=True, expected=Sample[int](1))
+

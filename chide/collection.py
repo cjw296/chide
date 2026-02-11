@@ -58,7 +58,9 @@ class Collection:
           it may be necessary to provided the annotated type for data instance
           such that it can be correctly added to the collection with that type.
         """
-        self.mapping[annotated or type(obj)] = simplifier.one(obj)
+        attrs = simplifier.one(obj)
+        orig_class = attrs.pop("__orig_class__", None)
+        self.mapping[annotated or orig_class or type(obj)] = attrs
 
     def attributes(self, type_: Type[T], **attrs: Any) -> Attrs:
         """
