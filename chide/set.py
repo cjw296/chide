@@ -1,4 +1,4 @@
-from typing import Any, TypeVar, Type, Hashable
+from typing import Any, TypeVar, Type, Hashable, cast
 
 from chide import Collection
 from .typing import Identifier
@@ -61,11 +61,12 @@ class Set:
         returned.
         """
         attrs = self.collection._attrs(type_, attrs, self.get)
+        constructor = cast(Type[T], self.collection.constructors.get(type_, type_))
         key = self.identify(type_, attrs)
         if key is None:
-            return type_(**attrs)
+            return constructor(**attrs)
         obj = self.objects.get(key)
         if obj is None:
-            obj = type_(**attrs)
+            obj = constructor(**attrs)
             self.objects[key] = obj
         return obj
