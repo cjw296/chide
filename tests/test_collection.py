@@ -171,20 +171,63 @@ class TestCollection(TestCase):
 
         collection = Collection({Sample[str]: {'a': 'foo'}, Sample[int]: {'a': 1}})
 
-        compare(collection.make(Sample[str], b=2.0), strict=True, expected=Sample[str]('foo',2.0))
+        compare(collection.make(Sample[str], b=2.0), strict=True, expected=Sample[str]('foo', 2.0))
         compare(collection.make(Sample[int], b=3.0), strict=True, expected=Sample[int](1, 3.0))
 
-    def test_parameterized_type_add(self) -> None:
+    def test_parameterized_type_add_direct(self) -> None:
         T = TypeVar('T')
 
-        @dataclass
         class Sample(Generic[T]):
-            a: T
+            def __init__(self, a: T) -> None:
+                self.a = a
 
         collection = Collection()
         collection.add(Sample[str]('foo'))
         collection.add(Sample[int](1))
 
-        compare(collection.make(Sample[str]), strict=True, expected=Sample[str]('foo'))
-        compare(collection.make(Sample[int]), strict=True, expected=Sample[int](1))
+        compare(
+            collection.make(Sample[str]), strict=True, ignore_eq=True, expected=Sample[str]('foo')
+        )
+        compare(
+            collection.make(Sample[int]), strict=True, ignore_eq=True, expected=Sample[int](1)
+        )
 
+        obj = collection.make(Sample[int])
+        assert '__orig_class__' in obj.__dict__, repr(obj.__dict__)
+
+    def test_parameterized_type_add_with_constructor(self) -> None:
+        T = TypeVar('T')
+
+        class Sample(Generic[T]):
+            def __init__(self, a: T) -> None:
+                self.a = a
+
+            @classmethod
+            def create(cls, a: T) -> 'Sample[T]':
+                return cls(a)
+
+        collection = Collection()
+        collection.add(Sample[int].create(1), annotated=Sample[int], constructor=Sample)
+
+        obj = collection.make(Sample[int])
+        compare(obj.a, expected=1)
+        assert '__orig_class__' not in obj.__dict__, repr(obj.__dict__)
+
+
+    def test_parameterized_type_bind_to_type(self) -> None:
+        T = TypeVar('T')
+
+        class Sample(Generic[T]):
+            def __init__(self, a: T) -> None:
+                self.a = a
+
+            @classmethod
+            def create(cls, a: T) -> 'Sample[T]':
+                return cls(a)
+
+        collection = Collection()
+        collection.add(Sample[int].create(1), annotated=Sample[int])
+
+        obj = collection.bind(Sample[int]).make(Sample)
+        compare(obj.a, expected=1)
+        assert '__orig_class__' not in obj.__dict__, repr(obj.__dict__)

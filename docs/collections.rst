@@ -1,6 +1,8 @@
 Collections
 ===========
 
+.. py:currentmodule:: chide
+
 Collections are the starting point for creating sample objects when using :mod:`chide`.
 They contain sample attributes for each of the types that have been added to them
 and can be used to create sample objects of those types that will have the sample
@@ -141,3 +143,80 @@ Further attributes can be bound into a factory to create a new, more specialised
 >>> another_factory = factory.bind(y=5)
 >>> another_factory.make()
 ClassOne(x=4, y=5)
+
+Generic classes and types
+-------------------------
+
+When working with generic classes such as this:
+
+.. code-block:: python
+
+    from typing import TypeVar, Generic
+
+    T = TypeVar('T')
+
+    class Sample(Generic[T]):
+        def __init__(self, value: T) -> None:
+            self.value = value
+
+        def __repr__(self) -> str:
+            return f'<Sample: {self.value!r}>'
+
+        @classmethod
+        def create(cls, value: T) -> 'Sample[T]':
+            return cls(value)
+
+You can add them to collections via their attributes:
+
+>>> collection = Collection({Sample[int]: {'value': 1}})
+>>> collection.make(Sample[int])
+<Sample: 1>
+
+You can also add sample objects:
+
+>>> collection.add(Sample[str]('hello'))
+>>> collection.make(Sample[str])
+<Sample: 'hello'>
+
+There is, however, an intricacy with parameterized types;
+instantiating them using the parameterized type alias will result in the instance having an
+``__orig_class__`` attribute:
+
+>>> Sample[int](1).__orig_class__
+Sample[int]
+
+But, if you instantiate them via the class alone, such as in the class method above, they will
+not:
+
+>>> Sample.create(1).__orig_class__
+Traceback (most recent call last):
+...
+AttributeError: 'Sample' object has no attribute '__orig_class__'...
+
+If you need all or most of your sample objects to be without this attribute, then
+you can override the constructor to use when adding a sample:
+
+>>> collection = Collection()
+>>> collection.add(Sample[str]('hello'), constructor=Sample)
+>>> collection.make(Sample[str])
+<Sample: 'hello'>
+>>> _.__orig_class__
+Traceback (most recent call last):
+...
+AttributeError: 'Sample' object has no attribute '__orig_class__'...
+
+If you're passing an attribute mapping to the :class:`Collection` constructor or need some samples
+with the ``__orig_class__`` and some without, then you can use this pattern with
+:meth:`~Collection.bind` and :meth:`~chide.factory.Factory.make`:
+
+>>> collection = Collection({Sample[int]: {'value': 1}})
+>>> collection.make(Sample[int])
+<Sample: 1>
+>>> _.__orig_class__
+Sample[int]
+>>> collection.bind(Sample[int]).make(Sample)
+<Sample: 1>
+>>> _.__orig_class__
+Traceback (most recent call last):
+...
+AttributeError: 'Sample' object has no attribute '__orig_class__'...

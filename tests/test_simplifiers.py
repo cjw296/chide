@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import TypeVar, Generic
 
 from testfixtures import compare, ShouldRaise
 
@@ -105,3 +106,17 @@ class TestObjectSimplifier:
         simplifier = ObjectSimplifier()
         with ShouldRaise(TypeError("Can't simplify <class 'list'> [1]")):
             simplifier.one([1])
+
+    def test_parameterized_type(self) -> None:
+        T = TypeVar('T')
+
+        @dataclass
+        class Sample(Generic[T]):
+            a: T
+
+        simplifier = ObjectSimplifier()
+        compare(
+            simplifier.one(Sample[str]('foo')),
+            expected={'a': 'foo', '__orig_class__': Sample[str]},
+            strict=True
+        )

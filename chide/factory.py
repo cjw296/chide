@@ -34,7 +34,7 @@ class Factory(Generic[T]):
         """
         return self.collection.attributes(self.type_, **self._combine(attrs))
 
-    def make(self, **attrs: Any) -> T:
+    def make(self, type_: Type[T] | None = None, /, **attrs: Any) -> T:
         """
         Make a sample object of this factory's type using the default
         attributes for the type in this factory's :class:`Collection`
@@ -43,8 +43,11 @@ class Factory(Generic[T]):
         The ``attrs`` mapping will be overlaid onto the sample attributes
         before being used to instantiate and return a new
         sample object of this factory's type.
+
+        If a type is provided, it will be used to construct the object in place of the
+        factory's type.
         """
-        return self.collection.make(self.type_, **self._combine(attrs))
+        return self.collection.make(self.type_, type_, **self._combine(attrs))
 
     def bind(self, **attrs: Any) -> Self:
         """
