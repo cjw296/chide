@@ -144,6 +144,8 @@ Further attributes can be bound into a factory to create a new, more specialised
 >>> another_factory.make()
 ClassOne(x=4, y=5)
 
+.. _generic-types:
+
 Generic classes and types
 -------------------------
 

@@ -3,6 +3,13 @@ Changes
 
 .. currentmodule:: chide
 
+3.3.0 (25 Feb 2026)
+-------------------
+
+- More support for generic types with a ``constructor`` parameter to :meth:`Collection.add`
+  and constructor override using :meth:`~Collection.bind` and :meth:`~chide.factory.Factory.make`.
+  See :ref:`generic-types`.
+
 3.2.0 (11 Feb 2026)
 -------------------
 
