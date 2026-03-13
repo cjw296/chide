@@ -2,7 +2,7 @@ Chide
 =====
 
 
-|Docs|_ |PyPI|_  |Git|_ |CircleCI|_
+|Docs|_ |PyPI|_  |Git|_ |CI|_
 
 .. |Docs| image:: https://readthedocs.org/projects/chide/badge/?version=latest
 .. _Docs: http://chide.readthedocs.org/en/latest/
@@ -13,8 +13,8 @@ Chide
 .. |Git| image:: https://badge.fury.io/gh/cjw296%2Fchide.svg
 .. _Git: https://github.com/cjw296/chide
 
-.. |CircleCI| image:: https://circleci.com/gh/cjw296/chide/tree/master.svg?style=shield
-.. _CircleCI: https://circleci.com/gh/cjw296/chide/tree/master
+.. |CI| image:: https://github.com/cjw296/chide/actions/workflows/ci.yml/badge.svg
+.. _CI: https://github.com/cjw296/chide
 
 Quickly create and compare sample objects.
 

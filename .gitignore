@@ -7,3 +7,4 @@ _build/
 README.html
 .venv
 .claude
+uv.lock

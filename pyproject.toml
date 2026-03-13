@@ -1,0 +1,61 @@
+[project]
+name = "chide"
+version = "3.3.0"
+description = "Quickly create sample objects from data."
+readme = "README.rst"
+authors = [{ name = "Chris Withers", email = "chris@withers.org" }]
+license = { text = "MIT" }
+requires-python = ">=3.11"
+dependencies = []
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+]
+
+[project.urls]
+Homepage = "https://github.com/cjw296/chide"
+Documentation = "https://chide.readthedocs.org/en/latest/"
+Repository = "https://github.com/cjw296/chide"
+Changelog = "https://chide.readthedocs.io/en/latest/changes.html"
+
+[project.optional-dependencies]
+sqlalchemy = ["sqlalchemy"]
+
+[dependency-groups]
+dev = [
+    "mypy>=1.0",
+    "pytest>=7.1",
+    "pytest-cov",
+    "sybil",
+    "testfixtures>=11.0.0",
+]
+docs = [
+    "sphinx",
+    "furo",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+addopts = "-p no:doctest"
+testpaths = ["tests", "docs"]
+
+[tool.mypy]
+strict = true
+check_untyped_defs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+
+[tool.coverage.run]
+source = ["chide"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "\\.\\.\\.",
+]

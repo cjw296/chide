@@ -1,54 +1,53 @@
 Development
 ===========
 
-.. highlight:: bash
-
 If you wish to contribute to this project, then you should fork the
 repository found here:
 
 https://github.com/cjw296/chide/
 
-Once that has been done and you have a checkout, you can follow these
-instructions to perform various development tasks:
+Once that has been done and you have a checkout,
+you can follow the instructions below to perform various development tasks.
 
-Setting up a virtualenv
------------------------
+For detailed development guidelines, code style requirements, and additional commands,
+see ``AGENTS.md`` in the repository root.
 
-The recommended way to set up a development environment is to create
-a virtualenv and then install the package in editable form as follows::
+Setting up a development environment
+-------------------------------------
 
-  $ python3 -m venv ~/virtualenvs/chide
-  $ source ~/virtualenvs/chide/bin/activate
-  $ pip install -U pip setuptools
-  $ pip install -U -e .[test,docs]
+The recommended way to set up a development environment is to use `uv`__
+to install all groups and extras:
+
+__ https://docs.astral.sh/uv/
+
+.. code-block:: bash
+
+    uv sync --dev --all-extras
 
 Running the tests
 -----------------
 
-Once you've set up a virtualenv, the tests can be run in the activated
-virtualenv and from the root of a source checkout as follows::
+Once you've set up the environment, the tests can be run from the root of a
+source checkout as follows:
 
-  $ pytest
+.. code-block:: bash
+
+  uv run pytest
 
 Building the documentation
 --------------------------
 
 The Sphinx documentation is built by doing the following from the
-directory containing ``setup.py``::
+repository root:
 
-  $ cd docs
-  $ make html
+.. code-block:: bash
 
-To check that the description that will be used on PyPI renders properly,
-do the following::
-
-  $ python setup.py --long-description | rst2html.py > desc.html
-
-The resulting ``desc.html`` should be checked by opening in a browser.
+  cd docs
+  make html
 
 Making a release
 ----------------
 
-To make a release, just update ``version.txt``, update the change log
-and push to https://github.com/cjw296/chide.
+To make a release, just update the version in ``pyproject.toml``, update the change log
+in ``CHANGELOG.rst`` and push to https://github.com/cjw296/chide.
 Carthorse should take care of the rest.
