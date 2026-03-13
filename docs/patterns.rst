@@ -323,7 +323,9 @@ Since the test fails, we get the following extensive :class:`AssertionError`::
     'temp_hi': 57 (expected) != 3 (actual)
     'temp_lo': 43 (expected) != -1 (actual)
 
-    While comparing [1]['date']: datetime.date(1994, 11, 29) (expected) != datetime.date(1994, 11, 20) (actual)
+    While comparing [1]['date']: not equal:
+    datetime.date(1994, 11, 29) (expected)
+    datetime.date(1994, 11, 20) (actual)
 
     While comparing [1]['prcp']: 0 (expected) != 0.2 (actual)
 

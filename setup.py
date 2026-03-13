@@ -34,7 +34,7 @@ setup(
             'pytest',
             'pytest-cov',
             'sybil',
-            'testfixtures>=9',
+            'testfixtures>=11.0.0',
         ] + optionals,
         docs=[
             'furo',
