@@ -32,9 +32,7 @@ def engine() -> Engine:
 
 
 def table_insert(engine: Engine, type_: Type[Base], text: str) -> None:
-    pretty = PrettyFormat(column_parse={
-        'date': lambda text_: datetime.strptime(text_, '%Y-%m-%d').date()
-    })
+    pretty = PrettyFormat(column_parse={'date': lambda text_: datetime.strptime(text_, '%Y-%m-%d').date()})
     with Session(engine) as session, session.begin():
         session.add_all(type_(**attrs) for attrs in pretty.parse(text))
 
@@ -51,7 +49,7 @@ def table_check_rows(engine: Engine, type_: Type[Base], text: str) -> None:
         compare(
             actual=actual,
             expected=expected,
-            suffix='\nShould be:\n'+pretty.render(actual, ref=expected)
+            suffix='\nShould be:\n' + pretty.render(actual, ref=expected),
         )
 
 
@@ -83,7 +81,7 @@ def test_insert(engine: Engine) -> None:
         |San Francisco|43     |57     |0   |1994-11-29|
         |Hayward      |37     |54     |None|1994-11-29|
         +-------------+-------+-------+----+----------+
-        """
+        """,
     )
     compare(
         Session(engine).query(Weather).all(),
@@ -92,17 +90,19 @@ def test_insert(engine: Engine) -> None:
             Weather(city='San Francisco', temp_lo=43, temp_hi=57, prcp=0, date=date(1994, 11, 29)),
             Weather(city='Hayward', temp_lo=37, temp_hi=54, prcp=None, date=date(1994, 11, 29)),
         ],
-        ignore_attributes=['_sa_instance_state']
+        ignore_attributes=['_sa_instance_state'],
     )
 
 
 def test_render_pass(engine: Engine) -> None:
     with Session(engine) as session, session.begin():
-        session.add_all((
-            Weather(city='San Francisco', temp_lo=4, temp_hi=5, prcp=0.25, date=date(1994, 11, 27)),
-            Weather(city='San Francisco', temp_lo=43, temp_hi=57, prcp=0, date=date(1994, 11, 29)),
-            Weather(city='Hayward', temp_lo=37, temp_hi=54, prcp=None, date=date(1994, 11, 29)),
-        ))
+        session.add_all(
+            (
+                Weather(city='San Francisco', temp_lo=4, temp_hi=5, prcp=0.25, date=date(1994, 11, 27)),
+                Weather(city='San Francisco', temp_lo=43, temp_hi=57, prcp=0, date=date(1994, 11, 29)),
+                Weather(city='Hayward', temp_lo=37, temp_hi=54, prcp=None, date=date(1994, 11, 29)),
+            )
+        )
     table_check_rows(
         engine,
         Weather,
@@ -114,7 +114,7 @@ def test_render_pass(engine: Engine) -> None:
         |San Francisco|43     |57     |0   |1994-11-29|
         |Hayward      |37     |54     |None|1994-11-29|
         +-------------+-------+-------+----+----------+
-        """
+        """,
     )
 
 
@@ -123,11 +123,13 @@ def test_render_fail(engine: Engine) -> None:
     # even when substitution is used in building the expected value:
     sample_lo_temp = 4
     with Session(engine) as session, session.begin():
-        session.add_all((
-            Weather(city='San Francisco', temp_lo=4, temp_hi=5, prcp=0.25, date=date(1994, 11, 27)),
-            Weather(city='San Francisco', temp_lo=-1, temp_hi=3, prcp=0.2, date=date(1994, 11, 20)),
-            Weather(city='Hayward', temp_lo=37, temp_hi=54, prcp=None, date=date(1994, 11, 29)),
-        ))
+        session.add_all(
+            (
+                Weather(city='San Francisco', temp_lo=4, temp_hi=5, prcp=0.25, date=date(1994, 11, 27)),
+                Weather(city='San Francisco', temp_lo=-1, temp_hi=3, prcp=0.2, date=date(1994, 11, 20)),
+                Weather(city='Hayward', temp_lo=37, temp_hi=54, prcp=None, date=date(1994, 11, 29)),
+            )
+        )
     with ShouldAssert(
         dedent("""\
             sequence not as expected:
@@ -201,17 +203,17 @@ def test_render_fail(engine: Engine) -> None:
             |San Francisco|43              |57     |0   |1994-11-29|
             |Hayward      |37              |54     |None|1994-11-29|
             +-------------+----------------+-------+----+----------+
-            """
+            """,
         )
 
 
 def test_render_fail_unified_diff(engine: Engine) -> None:
     with Session(engine) as session, session.begin():
-        session.add_all((
-            Weather(city='wide in db', temp_lo=1, temp_hi=5, prcp=0.25, date=date(1994, 11, 27)),
-        ))
+        session.add_all(
+            (Weather(city='wide in db', temp_lo=1, temp_hi=5, prcp=0.25, date=date(1994, 11, 27)),)
+        )
     with ShouldAssert(
-            dedent("""
+        dedent("""
                 --- expected
                 +++ actual
                 @@ -1,6 +1,6 @@
@@ -221,7 +223,8 @@ def test_render_fail_unified_diff(engine: Engine) -> None:
                 -|narrow    |111111122|5      |0.25|1994-11-27|
                 +|wide in db|1        |5      |0.25|1994-11-27|
                  +----------+---------+-------+----+----------+
-                """)+' ',
+                """)
+        + ' ',
     ):
         table_check_diff(
             engine,
@@ -232,5 +235,5 @@ def test_render_fail_unified_diff(engine: Engine) -> None:
             +------+---------+-------+----+----------+
             |narrow|111111122|5      |0.25|1994-11-27|
             +------+---------+-------+----+----------+
-            """
+            """,
         )

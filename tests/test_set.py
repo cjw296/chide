@@ -8,7 +8,6 @@ from chide.typing import Attrs
 
 
 class TestSet(TestCase):
-
     def setUp(self) -> None:
         self.collection = Collection({dict: {}})
 
@@ -21,6 +20,7 @@ class TestSet(TestCase):
             key = attrs['x']
             assert isinstance(key, int)
             return key
+
         samples = Set(self.collection, identify)
         obj1 = samples.get(dict, x=1)
         obj2 = samples.get(dict, x=1)
@@ -32,13 +32,13 @@ class TestSet(TestCase):
                 key = attrs['x']
                 assert isinstance(key, int)
                 return key
+
         samples = MySet(self.collection)
         obj1 = samples.get(dict, x=1)
         obj2 = samples.get(dict, x=1)
         self.assertTrue(obj1 is obj2)
 
     def test_identity_supplied_trumps_subclass(self) -> None:
-
         class MySet(Set):
             def identify(self, type_: Type[Any], attrs: Attrs) -> int:
                 raise AssertionError('should not be called')
@@ -70,6 +70,7 @@ class TestSet(TestCase):
                 return None
             assert isinstance(key, int)
             return key
+
         samples = Set(self.collection, identify)
         obj1 = samples.get(dict, x=1)
         compare(obj1, expected={'x': 1})

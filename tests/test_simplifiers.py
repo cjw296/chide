@@ -7,9 +7,7 @@ from chide.simplifiers import ObjectSimplifier
 
 
 class TestObjectSimplifier:
-
     def test_simple(self) -> None:
-
         class MyClass:
             def __init__(self, value: int):
                 self.value = value
@@ -26,7 +24,6 @@ class TestObjectSimplifier:
         )
 
     def test_dataclass(self) -> None:
-
         @dataclass
         class MyClass:
             value: int
@@ -71,7 +68,6 @@ class TestObjectSimplifier:
         compare(simplifier.one(actual_instance), expected={'x': 1, 'y': 2, 'z': 3})
 
     def test_slots_unset_or_none(self) -> None:
-
         class SampleClass:
             __slots__ = ['x']
             x: int | None
@@ -83,7 +79,8 @@ class TestObjectSimplifier:
         simplifier = ObjectSimplifier()
 
         compare(
-            simplifier.many([obj1, obj2]), expected=[{'x': None}, {}],
+            simplifier.many([obj1, obj2]),
+            expected=[{'x': None}, {}],
         )
 
     def test_dict(self) -> None:
@@ -93,7 +90,8 @@ class TestObjectSimplifier:
     def test_dict_subclass(self) -> None:
         simplifier = ObjectSimplifier()
 
-        class MyDict(dict[str, int]): pass
+        class MyDict(dict[str, int]):
+            pass
 
         compare(simplifier.one(MyDict(x=1)), expected={'x': 1}, strict=True)
 
@@ -118,5 +116,5 @@ class TestObjectSimplifier:
         compare(
             simplifier.one(Sample[str]('foo')),
             expected={'a': 'foo', '__orig_class__': Sample[str]},
-            strict=True
+            strict=True,
         )

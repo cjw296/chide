@@ -53,6 +53,12 @@ disallow_incomplete_defs = true
 [tool.coverage.run]
 source = ["chide"]
 
+[tool.ruff]
+line-length = 110
+
+[tool.ruff.format]
+quote-style = "preserve"
+
 [tool.coverage.report]
 exclude_lines = [
     "pragma: no cover",

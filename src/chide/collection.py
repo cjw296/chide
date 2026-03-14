@@ -21,12 +21,7 @@ class Collection:
         self.mapping = mapping or {}
         self.constructors: dict[Type[Any], Type[Any]] = {}
 
-    def _attrs(
-            self,
-            type_: Type[Any],
-            attrs: Attrs,
-            nest: Callable[[Type[T]], T]
-    ) -> Attrs:
+    def _attrs(self, type_: Type[Any], attrs: Attrs, nest: Callable[[Type[T]], T]) -> Attrs:
         computed_attrs = dict(self.mapping[type_])
         for key, value in computed_attrs.items():
             try:
@@ -39,11 +34,11 @@ class Collection:
         return computed_attrs
 
     def add(
-            self,
-            obj: T,
-            simplifier: Simplifier[T]  = ObjectSimplifier(),
-            annotated: Type[T] | None = None,
-            constructor: Type[T] | None = None,
+        self,
+        obj: T,
+        simplifier: Simplifier[T] = ObjectSimplifier(),
+        annotated: Type[T] | None = None,
+        constructor: Type[T] | None = None,
     ) -> None:
         """
         Add the attributes from the supplied object to this collection and
@@ -82,7 +77,7 @@ class Collection:
         """
         return self._attrs(type_, attrs, self.make)
 
-    def make(self, type_: Type[T], override: Type[T] | None = None, /,  **attrs: Any) -> T:
+    def make(self, type_: Type[T], override: Type[T] | None = None, /, **attrs: Any) -> T:
         """
         Make a sample object of the specified ``type_`` using the default
         attributes for that type in this :class:`Collection`.

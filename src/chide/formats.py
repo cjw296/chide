@@ -89,15 +89,15 @@ class TabularFormat(Format):
     header_type_pattern = re.compile(r'([^ (]+) *\((.+)\) *')
 
     def __init__(
-            self,
-            type_parse: ParseMapping | None = None,
-            default_type_parse: ValueParse = default_parse,
-            column_parse: ParseMapping | None = None,
-            type_render: TypeRenderMapping | None = None,
-            default_type_render: ValueRender = default_render,
-            type_names: TypeNameMapping | None = None,
-            column_render: ColumnRenderMapping | None = None,
-            types_location: TypeLocation | None = None,
+        self,
+        type_parse: ParseMapping | None = None,
+        default_type_parse: ValueParse = default_parse,
+        column_parse: ParseMapping | None = None,
+        type_render: TypeRenderMapping | None = None,
+        default_type_render: ValueRender = default_render,
+        type_names: TypeNameMapping | None = None,
+        column_render: ColumnRenderMapping | None = None,
+        types_location: TypeLocation | None = None,
     ) -> None:
         self.type_parse: ParseMapping = type_parse or {}
         self.column_parse: ParseMapping = column_parse or {}
@@ -123,7 +123,6 @@ class TabularFormat(Format):
         types_row_handled = self.types_location is not ROW
         types_row_next = False
         for parts in lexer(text):
-
             if columns is not None and not types_row_handled:
                 types_row_next = True
 
@@ -131,10 +130,7 @@ class TabularFormat(Format):
                 columns = []
                 type_names = {}
                 for c in parts:
-                    if (
-                            self.types_location is HEADER
-                            and (match := self.header_type_pattern.match(c))
-                    ):
+                    if self.types_location is HEADER and (match := self.header_type_pattern.match(c)):
                         column, t = match.groups()
                         type_names[column] = t
                     else:
@@ -159,7 +155,6 @@ class TabularFormat(Format):
 
 
 class Widths(dict[str, int]):
-
     def handle(self, item: Mapping[str, str | int]) -> None:
         for column, text_or_width in item.items():
             width = text_or_width if isinstance(text_or_width, int) else len(text_or_width)
@@ -172,7 +167,7 @@ class RenderedRows(list[dict[str, str]]):
     header: dict[str, str]
 
     def __init__(
-            self, attrs: Iterable[Attrs], format_: 'TabularFormat', columns: list[str] | None = None
+        self, attrs: Iterable[Attrs], format_: 'TabularFormat', columns: list[str] | None = None
     ) -> None:
         super().__init__()
         for attrs_ in attrs:
@@ -217,7 +212,6 @@ class RenderedRows(list[dict[str, str]]):
 
 
 class PrettyLexer:
-
     def __init__(self, padding: int):
         self.widths: list[int] = []
         self.padding = padding
@@ -234,9 +228,9 @@ class PrettyLexer:
             for part in parts:
                 width = len(part)
                 if (
-                        width >= padding_size and
-                        part[:self.padding] == padding_text and
-                        part[-self.padding:] == padding_text
+                    width >= padding_size
+                    and part[: self.padding] == padding_text
+                    and part[-self.padding :] == padding_text
                 ):
                     width -= padding_size
                 widths.append(width)
@@ -252,6 +246,7 @@ class PrettyParsed(list[Attrs]):
     A list of :class:`~chide.typing.Attrs` that also keeps track of the :attr:`widths`
     required to render the columns, if they are known.
     """
+
     def __init__(self, attrs: list[Attrs], widths: list[int]) -> None:
         super().__init__(attrs)
         #: The widths required for the columns needed by these `~chide.typing.Attrs`.
@@ -262,11 +257,10 @@ class PrettyParsed(list[Attrs]):
 
 
 class PrettyRenderedRows(list[str]):
-
     def __init__(self, widths: Widths, padding: int) -> None:
         super().__init__()
-        self.divider = ''.join('+'+'-'*(widths[column]+padding*2) for column in widths)+'+\n'
-        pad = padding*' '
+        self.divider = ''.join('+' + '-' * (widths[column] + padding * 2) for column in widths) + '+\n'
+        pad = padding * ' '
         self.templates = {c: f'|{pad}{{:{w}}}{pad}' for c, w in widths.items()}
         self.widths = widths
 
@@ -334,17 +328,17 @@ class PrettyFormat(TabularFormat):
     """
 
     def __init__(
-            self,
-            type_parse: ParseMapping | None = None,
-            default_type_parse: ValueParse = default_parse,
-            column_parse: ParseMapping | None = None,
-            type_render: TypeRenderMapping | None = None,
-            default_type_render: ValueRender = default_render,
-            type_names: TypeNameMapping | None = None,
-            column_render: ColumnRenderMapping | None = None,
-            types_location: TypeLocation | None = None,
-            minimum_column_widths: dict[str, int] | None = None,
-            padding: int = 1,
+        self,
+        type_parse: ParseMapping | None = None,
+        default_type_parse: ValueParse = default_parse,
+        column_parse: ParseMapping | None = None,
+        type_render: TypeRenderMapping | None = None,
+        default_type_render: ValueRender = default_render,
+        type_names: TypeNameMapping | None = None,
+        column_render: ColumnRenderMapping | None = None,
+        types_location: TypeLocation | None = None,
+        minimum_column_widths: dict[str, int] | None = None,
+        padding: int = 1,
     ) -> None:
         super().__init__(
             type_parse,

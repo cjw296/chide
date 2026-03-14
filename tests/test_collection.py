@@ -12,13 +12,11 @@ from .test_helpers import Sample
 
 
 class TypeA(Comparable, object):
-
     def __init__(self, x: int, y: 'int | TypeB | Type[TypeB]') -> None:
         self.x, self.y = x, y
 
 
 class TypeB(Comparable):
-
     def __init__(self, a: int, b: int) -> None:
         self.a, self.b = a, b
 
@@ -34,7 +32,6 @@ class TypeC(Comparable, object):
 
 
 def make_type_c() -> Type[TypeC]:
-
     class TypeC_(TypeC):
         seen = set()
 
@@ -42,7 +39,6 @@ def make_type_c() -> Type[TypeC]:
 
 
 class TestCollection(TestCase):
-
     def test_basic(self) -> None:
         samples = Collection({TypeA: {'x': 1, 'y': 2}})
         compare(TypeA(1, 2), actual=samples.make(TypeA))
@@ -54,10 +50,12 @@ class TestCollection(TestCase):
         compare(samples.make(TypeA), expected=TypeA(1, 2))
 
     def test_nested(self) -> None:
-        samples = Collection({
-            TypeA: {'x': 1, 'y': TypeB},
-            TypeB: {'a': 3, 'b': 4},
-        })
+        samples = Collection(
+            {
+                TypeA: {'x': 1, 'y': TypeB},
+                TypeB: {'a': 3, 'b': 4},
+            }
+        )
         compare(TypeA(1, TypeB(3, 4)), actual=samples.make(TypeA))
 
     def test_nested_leave_explicit_types(self) -> None:
@@ -80,7 +78,6 @@ class TestCollection(TestCase):
             samples.make(TypeC)
 
     def test_identify_and_set(self) -> None:
-
         type_c = make_type_c()
 
         def identify_type_c(type_: Type[TypeC], attrs: Attrs) -> int:
@@ -105,7 +102,6 @@ class TestCollection(TestCase):
         assert made['y'] is unhashable
 
     def test_add_sample(self) -> None:
-
         @dataclass
         class Sample:
             x: int
@@ -119,7 +115,6 @@ class TestCollection(TestCase):
         assert collection.make(Sample) is not sample
 
     def test_with_explicit_simplifier(self) -> None:
-
         class Sample:
             pass
 
@@ -133,22 +128,22 @@ class TestCollection(TestCase):
         compare(collection.attributes(Sample), expected={'made': 'up'})
 
     def test_annotated_data_to_constructor(self) -> None:
-
         SampleFooData = Annotated[dict, 'foo']
         SampleBarData = Annotated[dict, 'bar']
 
-        collection = Collection({
-            dict: {'type': 'dict'},
-            SampleFooData: {'type': 'foo'},
-            SampleBarData: {'type': 'bar'},
-        })
+        collection = Collection(
+            {
+                dict: {'type': 'dict'},
+                SampleFooData: {'type': 'foo'},
+                SampleBarData: {'type': 'bar'},
+            }
+        )
 
         compare(collection.make(dict), strict=True, expected={'type': 'dict'})
         compare(collection.make(SampleFooData), strict=True, expected={'type': 'foo'})
         compare(collection.make(SampleBarData), strict=True, expected={'type': 'bar'})
 
     def test_annotated_data_to_add(self) -> None:
-
         SampleFooData = Annotated[dict, 'foo']
         SampleBarData = Annotated[dict, 'bar']
 
@@ -185,12 +180,8 @@ class TestCollection(TestCase):
         collection.add(Sample[str]('foo'))
         collection.add(Sample[int](1))
 
-        compare(
-            collection.make(Sample[str]), strict=True, ignore_eq=True, expected=Sample[str]('foo')
-        )
-        compare(
-            collection.make(Sample[int]), strict=True, ignore_eq=True, expected=Sample[int](1)
-        )
+        compare(collection.make(Sample[str]), strict=True, ignore_eq=True, expected=Sample[str]('foo'))
+        compare(collection.make(Sample[int]), strict=True, ignore_eq=True, expected=Sample[int](1))
 
         obj = collection.make(Sample[int])
         assert '__orig_class__' in obj.__dict__, repr(obj.__dict__)
@@ -212,7 +203,6 @@ class TestCollection(TestCase):
         obj = collection.make(Sample[int])
         compare(obj.a, expected=1)
         assert '__orig_class__' not in obj.__dict__, repr(obj.__dict__)
-
 
     def test_parameterized_type_bind_to_type(self) -> None:
         T = TypeVar('T')

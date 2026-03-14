@@ -6,7 +6,7 @@ from sybil.parsers.rest import DocTestParser, PythonCodeBlockParser, CapturePars
 
 pytest_collect_file = Sybil(
     parsers=[
-        DocTestParser(optionflags=REPORT_NDIFF|ELLIPSIS),
+        DocTestParser(optionflags=REPORT_NDIFF | ELLIPSIS),
         PythonCodeBlockParser(),
         CaptureParser(),
     ],

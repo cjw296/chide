@@ -13,6 +13,7 @@ class Factory(Generic[T]):
     A factory for objects of a particular type.
     These are created by either :meth:`chide.Collection.bind` or :meth:`chide.factory.Factory.bind`.
     """
+
     def __init__(self, collection: 'Collection', type_: Type[T], attrs: dict[str, Any]) -> None:
         self.collection = collection
         self.type_ = type_
