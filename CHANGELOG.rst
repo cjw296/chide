@@ -3,6 +3,15 @@ Changes
 
 .. currentmodule:: chide
 
+4.0.0 (14 Mar 2026)
+-------------------
+
+- Move to new-style UV project layout.
+
+- Replace implicit nesting with explicit :func:`nest` marker.
+
+- Introduce new :func:`call` marker, for dynamic attributes.
+
 3.3.0 (25 Feb 2026)
 -------------------
 

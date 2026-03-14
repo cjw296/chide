@@ -1,6 +1,6 @@
 [project]
 name = "chide"
-version = "3.3.0"
+version = "4.0.0"
 description = "Quickly create sample objects from data."
 readme = "README.rst"
 authors = [{ name = "Chris Withers", email = "chris@withers.org" }]
