@@ -14,7 +14,7 @@ from sqlalchemy.orm import (
 )
 from testfixtures import compare, ShouldRaise
 
-from chide import Collection
+from chide import Collection, nest
 from chide.sqlalchemy import Set
 from .helpers import Comparable
 
@@ -85,7 +85,7 @@ class TestSQLAlchemyCollection(TestCase):
             id = Column(Integer, primary_key=True)
             value = Column(String)
 
-        samples = Collection({Parent: {'id': 1, 'child': Child}, Child: {'id': 3, 'value': 'Foo'}})
+        samples = Collection({Parent: {'id': 1, 'child': nest(Child)}, Child: {'id': 3, 'value': 'Foo'}})
 
         parent1 = samples.make(Parent, id=1)
         parent2 = samples.make(Parent, id=2)
@@ -110,7 +110,7 @@ class TestSQLAlchemyCollection(TestCase):
             id = Column(Integer, primary_key=True)
             value = Column(String)
 
-        collection = Collection({Parent: {'id': 1, 'child': Child}, Child: {'id': 3, 'value': 'Foo'}})
+        collection = Collection({Parent: {'id': 1, 'child': nest(Child)}, Child: {'id': 3, 'value': 'Foo'}})
 
         samples = Set(collection)
         parent1 = samples.get(Parent, id=1)
@@ -206,8 +206,8 @@ class TestSQLAlchemyCollection(TestCase):
         collection = Collection(
             {
                 Bar: {'id': 1, 'value': 2},
-                Foo: {'id': 3, 'bar': Bar, 'bar_id': 1},
-                Baz: {'id': 4, 'foo': Foo, 'foo_id': 3},
+                Foo: {'id': 3, 'bar': nest(Bar), 'bar_id': 1},
+                Baz: {'id': 4, 'foo': nest(Foo), 'foo_id': 3},
             }
         )
         samples = Set(collection)

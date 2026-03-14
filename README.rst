@@ -48,11 +48,11 @@ We can set up a registry of sample values as follows:
 
 .. code-block:: python
 
-  from chide import Collection
+  from chide import Collection, nest
 
   samples = Collection({
       ClassOne: {'x': 1, 'y': 2},
-      ClassTwo: {'a': 1, 'b': ClassOne},
+      ClassTwo: {'a': 1, 'b': nest(ClassOne)},
   })
 
 Now we can quickly make sample objects:

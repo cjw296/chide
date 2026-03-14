@@ -14,6 +14,6 @@ echo "=== Type Checking ==="
 uv run mypy src/chide tests
 
 echo "=== Docs Build ==="
-make -C docs clean html SPHINXOPTS=--fail-on-warning
+uv run make -C docs clean html SPHINXOPTS=--fail-on-warning
 
 echo "=== All checks passed! ==="

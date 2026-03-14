@@ -1,6 +1,7 @@
 from typing import Type, Any, TypeVar, Callable, cast
 
 from .factory import Factory
+from .markers import Nested, Dynamic
 from .simplifiers import ObjectSimplifier, Simplifier
 from .typing import Attrs
 
@@ -24,12 +25,12 @@ class Collection:
     def _attrs(self, type_: Type[Any], attrs: Attrs, nest: Callable[[Type[T]], T]) -> Attrs:
         computed_attrs = dict(self.mapping[type_])
         for key, value in computed_attrs.items():
-            try:
-                value_in_mapping = value in self.mapping
-            except TypeError:
-                value_in_mapping = False
-            if value_in_mapping and key not in attrs:
-                computed_attrs[key] = nest(value)
+            if key in attrs:
+                continue
+            if isinstance(value, Nested):
+                computed_attrs[key] = nest(value.type_)
+            elif isinstance(value, Dynamic):
+                computed_attrs[key] = value.factory()
         computed_attrs.update(attrs)
         return computed_attrs
 

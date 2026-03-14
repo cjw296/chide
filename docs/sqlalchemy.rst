@@ -48,10 +48,10 @@ We can set up a collection of sample values as follows:
 
 .. code-block:: python
 
-    from chide import Collection
+    from chide import Collection, nest
 
     samples = Collection({
-        Parent: {'id': 1, 'child': Child},
+        Parent: {'id': 1, 'child': nest(Child)},
         Child: {'id': 3, 'value': 42}
     })
 

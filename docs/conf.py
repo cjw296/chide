@@ -33,6 +33,8 @@ nitpick_ignore = [
     ('py:class', 'chide.factory.T'),  # type var
     ('py:obj', 'chide.factory.T'),  # type var
     ('py:class', 'chide.set.T'),  # type var
+    ('py:class', 'chide.markers.T'),  # type var
+    ('py:obj', 'chide.markers.T'),  # type var
     ('py:class', 'chide.simplifiers.T'),  # type var
     ('py:obj', 'chide.simplifiers.T'),  # type var
     ('py:func', 'identify'),  # documentation example

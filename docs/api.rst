@@ -7,6 +7,12 @@ API Reference
 .. automodule:: chide.factory
   :members:
 
+Markers
+-------
+
+.. automodule:: chide.markers
+  :members: nest, call
+
 Typing
 ------
 
