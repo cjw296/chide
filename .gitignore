@@ -8,3 +8,4 @@ README.html
 .venv
 .claude
 uv.lock
+.coverage
