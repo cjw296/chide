@@ -21,19 +21,19 @@ Repository = "https://github.com/cjw296/chide"
 Changelog = "https://chide.readthedocs.io/en/latest/changes.html"
 
 [project.optional-dependencies]
-sqlalchemy = ["sqlalchemy"]
+sqlalchemy = ["sqlalchemy>=2.0.36"]
 
 [dependency-groups]
 dev = [
     "mypy>=1.0",
-    "pytest>=7.1",
-    "pytest-cov",
-    "sybil",
-    "testfixtures>=11.0.0",
+    "pytest>=9",
+    "pytest-cov>=7",
+    "sybil>=9.3",
+    "testfixtures>=11",
 ]
 docs = [
-    "sphinx",
-    "furo",
+    "sphinx>=8",
+    "furo>=2025.12.19",
 ]
 
 [build-system]
