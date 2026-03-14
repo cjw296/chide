@@ -1,11 +1,4 @@
-# -*- coding: utf-8 -*-
-import os, datetime, time
 from importlib import metadata
-
-on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
-build_date = datetime.datetime.utcfromtimestamp(
-    int(os.environ.get('SOURCE_DATE_EPOCH', time.time()))
-)
 
 extensions = [
     'sphinx.ext.autodoc',
@@ -23,7 +16,7 @@ intersphinx_mapping = {
 source_suffix = '.rst'
 master_doc = 'index'
 project = 'chide'
-copyright = '2016 - %s Chris Withers' % build_date.year
+copyright = '2016 onwards Chris Withers'
 version = release = metadata.version(project)
 exclude_trees = ['_build']
 pygments_style = 'sphinx'
@@ -32,11 +25,6 @@ autodoc_member_order = 'bysource'
 # Options for HTML output
 html_theme = 'furo'
 htmlhelp_basename = project + 'doc'
-
-# Options for LaTeX output
-latex_documents = [
-    ('index', project + '.tex', project + ' Documentation', 'Chris Withers', 'manual'),
-]
 
 nitpicky = True
 nitpick_ignore = [
