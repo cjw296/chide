@@ -368,12 +368,12 @@ In order to store these in a :class:`Collection`, annotated types can be used:
 .. code-block:: python
 
     from typing import Annotated
-    from chide import Collection
+    from chide import Collection, nest
 
     Person = Annotated[dict[str, str], 'Person']
     Address = Annotated[dict[str, str], 'Address']
 
-    samples = Collection({Person: {'name': 'John Doe', 'address': Address}})
+    samples = Collection({Person: {'name': 'John Doe', 'address': nest(Address)}})
 
 To add this kind of sample to an existing collection, the type must be supplied:
 

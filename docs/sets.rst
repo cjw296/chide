@@ -28,10 +28,10 @@ function as follows:
 
 .. code-block:: python
 
-  from chide import Collection, Set
+  from chide import Collection, Set, nest
 
   data = Collection({
-      Person: {'name': 'Fred', 'address': Address},
+      Person: {'name': 'Fred', 'address': nest(Address)},
       Address: {'value': 'some place in the clouds'},
   })
 

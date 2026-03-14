@@ -31,11 +31,11 @@ We can set up a collection of sample values as follows:
 
 .. code-block:: python
 
-  from chide import Collection
+  from chide import Collection, nest
 
   samples = Collection({
       ClassOne: {'x': 1, 'y': 2},
-      ClassTwo: {'a': 1, 'b': ClassOne},
+      ClassTwo: {'a': 1, 'b': nest(ClassOne)},
   })
 
 Now we can quickly make sample objects:
@@ -88,11 +88,11 @@ Given this collection:
 
 .. code-block:: python
 
-  from chide import Collection
+  from chide import Collection, nest
 
   samples = Collection({
       ClassOne: {'x': 1, 'y': 2},
-      ClassTwo: {'a': 1, 'b': ClassOne},
+      ClassTwo: {'a': 1, 'b': nest(ClassOne)},
   })
 
 We can also create attributes to make a sample object:
@@ -143,6 +143,37 @@ Further attributes can be bound into a factory to create a new, more specialised
 >>> another_factory = factory.bind(y=5)
 >>> another_factory.make()
 ClassOne(x=4, y=5)
+
+Dynamic attributes
+------------------
+
+Some attributes should differ on every sample object. Use :func:`call` to wrap a
+zero-argument callable so it is invoked fresh on each :meth:`~Collection.make` call:
+
+.. code-block:: python
+
+    from uuid import UUID, uuid4
+    from chide import Collection, call
+
+    @dataclass
+    class User:
+        id: UUID
+        name: str
+
+    users = Collection({User: {'id': call(uuid4), 'name': 'Alice'}})
+
+Now each sample gets its own UUID:
+
+>>> u1 = users.make(User)
+>>> u2 = users.make(User)
+>>> u1.id == u2.id
+False
+
+You can still override a ``call``-marked attribute at make-time in the usual way:
+
+>>> fixed_id = uuid4()
+>>> users.make(User, id=fixed_id).id == fixed_id
+True
 
 .. _generic-types:
 

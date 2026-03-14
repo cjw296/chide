@@ -4,7 +4,7 @@ from typing import Type, Annotated, TypeVar, Generic
 from testfixtures import compare, ShouldRaise
 from unittest import TestCase
 
-from chide import Collection, Set
+from chide import Collection, Set, nest, call
 from chide.simplifiers import Simplifier
 from chide.typing import Attrs
 from .helpers import Comparable
@@ -52,7 +52,7 @@ class TestCollection(TestCase):
     def test_nested(self) -> None:
         samples = Collection(
             {
-                TypeA: {'x': 1, 'y': TypeB},
+                TypeA: {'x': 1, 'y': nest(TypeB)},
                 TypeB: {'a': 3, 'b': 4},
             }
         )
@@ -204,6 +204,24 @@ class TestCollection(TestCase):
         compare(obj.a, expected=1)
         assert '__orig_class__' not in obj.__dict__, repr(obj.__dict__)
 
+    def test_nest_marker(self) -> None:
+        collection = Collection({TypeA: {'x': 1, 'y': nest(TypeB)}, TypeB: {'a': 3, 'b': 4}})
+        compare(actual=collection.make(TypeA), expected=TypeA(1, TypeB(3, 4)))
+
+    def test_nest_override_skips_nesting(self) -> None:
+        collection = Collection({TypeA: {'x': 1, 'y': nest(TypeB)}, TypeB: {'a': 3, 'b': 4}})
+        compare(actual=collection.make(TypeA, y=TypeB(7, 8)), expected=TypeA(1, TypeB(7, 8)))
+
+    def test_call_marker(self) -> None:
+        counter = iter(range(100))
+        collection = Collection({TypeA: {'x': call(lambda: next(counter)), 'y': 0}})
+        compare(actual=collection.make(TypeA), expected=TypeA(0, 0))
+        compare(actual=collection.make(TypeA), expected=TypeA(1, 0))
+
+    def test_call_override_skips_factory(self) -> None:
+        collection = Collection({TypeA: {'x': call(lambda: 1 / 0), 'y': 0}})
+        compare(actual=collection.make(TypeA, x=99), expected=TypeA(99, 0))
+
     def test_non_type_error_from_hash(self) -> None:
         class BadHash:
             def __hash__(self) -> int:
@@ -242,7 +260,7 @@ class TestCollection(TestCase):
         # `value in mapping` is True (same hash as TypeB, value == TypeB)
         # so y gets incorrectly nested as TypeB(3, 4) instead of staying as value
         actual = collection.make(TypeA)
-        assert actual.y is value
+        assert actual.y is value  # type: ignore[comparison-overlap]
 
     def test_parameterized_type_bind_to_type(self) -> None:
         T = TypeVar('T')
