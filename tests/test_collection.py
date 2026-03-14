@@ -204,6 +204,46 @@ class TestCollection(TestCase):
         compare(obj.a, expected=1)
         assert '__orig_class__' not in obj.__dict__, repr(obj.__dict__)
 
+    def test_non_type_error_from_hash(self) -> None:
+        class BadHash:
+            def __hash__(self) -> int:
+                raise ValueError("unexpected hash error")
+
+        collection = Collection({TypeA: {'x': 1, 'y': BadHash()}})
+        collection.make(TypeA)  # currently raises ValueError, should not
+
+    def test_type_value_stored_as_literal(self) -> None:
+        # TypeA accepts y: int | TypeB | Type[TypeB], so TypeB-the-class is a valid value
+        collection = Collection(
+            {
+                TypeA: {'x': 1, 'y': TypeB},
+                TypeB: {'a': 3, 'b': 4},
+            }
+        )
+        # Currently nests TypeB → TypeA(1, TypeB(3, 4))
+        # Should be possible to express TypeA(1, TypeB) but there's no way to do so
+        compare(actual=collection.make(TypeA), expected=TypeA(1, TypeB))
+
+    def test_value_equal_to_mapped_type_not_nested(self) -> None:
+        class ValueEqualToTypeB:
+            def __hash__(self) -> int:
+                return hash(TypeB)
+
+            def __eq__(self, other: object) -> bool:
+                return other is TypeB
+
+        value = ValueEqualToTypeB()
+        collection = Collection(
+            {
+                TypeA: {'x': 1, 'y': value},
+                TypeB: {'a': 3, 'b': 4},
+            }
+        )
+        # `value in mapping` is True (same hash as TypeB, value == TypeB)
+        # so y gets incorrectly nested as TypeB(3, 4) instead of staying as value
+        actual = collection.make(TypeA)
+        assert actual.y is value
+
     def test_parameterized_type_bind_to_type(self) -> None:
         T = TypeVar('T')
 
