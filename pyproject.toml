@@ -28,6 +28,7 @@ dev = [
     "mypy>=1.0",
     "pytest>=9",
     "pytest-cov>=7",
+    "ruff>=0.9",
     "sybil>=9.3",
     "testfixtures>=11",
 ]

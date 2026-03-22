@@ -5,7 +5,7 @@ echo "=== Syncing dependencies ==="
 uv sync --all-extras --all-groups
 
 echo "=== Formatting ==="
-uvx ruff format .
+uv run ruff format .
 
 echo "=== Tests + Coverage ==="
 uv run pytest --cov=src/chide --cov-report=term-missing --cov-fail-under=100 .
