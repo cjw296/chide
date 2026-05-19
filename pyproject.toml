@@ -52,7 +52,7 @@ disallow_untyped_defs = true
 disallow_incomplete_defs = true
 
 [tool.coverage.run]
-source = ["chide"]
+source = ["chide", "tests"]
 
 [tool.ruff]
 line-length = 110
