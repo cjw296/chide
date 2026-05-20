@@ -224,11 +224,13 @@ class TestCollection(TestCase):
 
     def test_non_type_error_from_hash(self) -> None:
         class BadHash:
-            def __hash__(self) -> int:
+            def __hash__(self) -> int:  # pragma: no cover - must never be called
                 raise ValueError("unexpected hash error")
 
         collection = Collection({TypeA: {'x': 1, 'y': BadHash()}})
-        collection.make(TypeA)  # currently raises ValueError, should not
+        # Regression guard: values must not be hashed against the type mapping;
+        # nesting only happens via the explicit nest() marker.
+        collection.make(TypeA)
 
     def test_type_value_stored_as_literal(self) -> None:
         # TypeA accepts y: int | TypeB | Type[TypeB], so TypeB-the-class is a valid value
@@ -244,10 +246,10 @@ class TestCollection(TestCase):
 
     def test_value_equal_to_mapped_type_not_nested(self) -> None:
         class ValueEqualToTypeB:
-            def __hash__(self) -> int:
+            def __hash__(self) -> int:  # pragma: no cover - must never be called
                 return hash(TypeB)
 
-            def __eq__(self, other: object) -> bool:
+            def __eq__(self, other: object) -> bool:  # pragma: no cover - must never be called
                 return other is TypeB
 
         value = ValueEqualToTypeB()
@@ -257,8 +259,9 @@ class TestCollection(TestCase):
                 TypeB: {'a': 3, 'b': 4},
             }
         )
-        # `value in mapping` is True (same hash as TypeB, value == TypeB)
-        # so y gets incorrectly nested as TypeB(3, 4) instead of staying as value
+        # Regression guard: nesting is driven by the explicit nest() marker, so a
+        # value that compares equal to a mapped type must pass through untouched
+        # rather than triggering a `value in mapping` lookup.
         actual = collection.make(TypeA)
         assert actual.y is value  # type: ignore[comparison-overlap]
 
